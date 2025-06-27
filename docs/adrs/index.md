@@ -89,4 +89,3 @@ This document tracks relevant Architectural Decision Records (ADRs) for the Tink
   Roles, responsibilities, PR review flow, escalation path.
 
 ---
-
