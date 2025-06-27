@@ -1,8 +1,8 @@
-# 🧚‍♀️ Tinkerbell — Autonomous Agentic 
+# 🧚‍♀️ Tinkerbell — Autonomous Agentic Runtime
 
-<img src="docs/images/tinkerbell.png" alt="Tinkerbell Logo" width="500"/>
+<img src="docs/images/tinkerbell.png" alt="Tinkerbell Logo" width="800"/>
 
-Welcome to **Tinkerbell**, an open-source Rust project designed to build the next generation
+Welcome to **Tinkerbell**, an open-source project designed to build the next generation
 of **autonomous agentic runtimes**.
 
 Tinkerbell acts as a long-running, intelligent daemon that can understand user requests, generate

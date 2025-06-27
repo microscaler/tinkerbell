@@ -58,7 +58,7 @@ Agent loop runs under the control of the `scheduler`, within a `TaskContext`, an
 
 ---
 
-## Initial ReAct Sequence Diagram
+## Enhanced ReAct Sequence Diagram (with Virtual Canvas and GitOps Integration)
 
 ```mermaid
 sequenceDiagram
@@ -67,6 +67,7 @@ sequenceDiagram
     participant LLM
     participant Tool
     participant Canvas
+    participant Git
     participant WAL
 
     User->>Agent: Submit instruction (e.g. "Add integration test")
@@ -74,15 +75,21 @@ sequenceDiagram
     Agent->>LLM: Generate plan
     LLM-->>Agent: Return structured plan (steps)
     Agent->>WAL: Log plan
+    Agent->>Git: Create feature branch (e.g. tinkerbell/feature/UUID)
+
     loop For each step in plan
         Agent->>User: Request confirmation (optional)
         User-->>Agent: Approve step
         Agent->>Tool: Execute tool
         Tool-->>Agent: Return result
-        Agent->>Canvas: Commit patch
-        Canvas-->>Agent: Ack commit
-        Agent->>WAL: Log step completion
+        Agent->>Canvas: Generate virtual patch (in-memory edit)
+        Canvas-->>Agent: Patch preview
+        Agent->>Git: Apply patch (micro-commit on canvas branch)
+        Agent->>WAL: Log commit metadata
     end
+
+    Agent->>Git: Create summary commit (squash or merge strategy)
+    Agent->>Git: PR or merge to `main`
     Agent->>WAL: Log task complete
     Agent-->>User: Respond with summary/result
 ```
@@ -107,11 +114,11 @@ This alternating cycle is a natural match for coroutine-based agents.
 ### ✍️ Recordability
 Each yield point corresponds to a WAL entry, and optionally, a virtual canvas diff. This provides traceability for every agent step — useful for debugging, replay, auditing, and agent explainability.
 
-### 🔄 Loops vs Chains
-We intentionally use **loops (ReAct)** over **fixed pipelines (Chain-of-Thought)** because:
-- Agent may retry failed actions
-- Agent may request new information from tools
-- Loops allow non-linear, interruptible workflows
+### 🔄 GitOps Commit Model
+- Each agent session operates on a dedicated `tinkerbell/feature/UUID` branch.
+- Every canvas action results in a `micro-commit` describing a semantic step.
+- Summary commits or merge commits allow audit, PRs, and history inspection.
+- Git patching and conflict handling is done via `git2-rs` and canvas logic.
 
 ### 👷 Extensibility
 Additional phases like:
@@ -126,8 +133,10 @@ Additional phases like:
 - All agent interactions must be decomposed into yieldable planning/action cycles
 - The LLM planning interface must support structured plan output (JSON schema, ReAct markdown, etc.)
 - WAL will record: instruction → plan → step start → step result → conclusion
-- Recovered agents must resume at last successful step
-- Tests must verify plan parsing, loop control, and final output
+- Git branches must be managed for every task (`tinkerbell/feature/...`)
+- Canvas operations must map cleanly to micro-commits
+- Recovered agents must resume at last successful step or Git commit
+- Tests must verify plan parsing, loop control, git patching, and WAL consistency
 
 ---
 
@@ -136,6 +145,7 @@ Additional phases like:
 - **Chain-based pipelines**: Good for linear tasks, bad for interactive agents
 - **State machines per agent**: Verbose, hard to modify; coroutines are clearer
 - **Spawn-per-step async**: Lacks yield control, hard to reason about
+- **No GitOps**: Removes auditability, traceability, and rollback safety
 
 ---
 
@@ -147,6 +157,6 @@ Additional phases like:
 ---
 
 ## Adopted
-This ADR is accepted as of June 2025. All agent interactions will follow a coroutine-driven ReAct loop pattern, yielding to LLMs, tools, and patches iteratively.
+This ADR is accepted as of June 2025. All agent interactions will follow a coroutine-driven ReAct loop pattern, yielding to LLMs, tools, patches, and Git-managed commits.
 
 Maintainers: `@casibbald`, `@microscaler-team`

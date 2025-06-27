@@ -14,8 +14,14 @@ We follow a **strict test-first workflow**.
 ### ✅ Requirements:
 - **Write a failing test before implementing logic**
 - **Unit tests are mandatory for all new features**
+- **Behavioral tests must cover all public APIs**
+- **Pact tests are required for all external service interactions**
 - **Integration tests are expected for component interaction**
 - **No untested code is accepted into `main`**
+
+### 📊 Code Coverage:
+- Aim for **70% coverage** on all new code
+- Ideally achieve **90%+ coverage** on components
 
 You may use `#[ignore]` for tests involving networked tools or MCP dependencies, but local unit coverage must always be high.
 
