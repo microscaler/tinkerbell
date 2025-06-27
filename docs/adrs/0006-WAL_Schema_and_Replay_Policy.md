@@ -62,15 +62,59 @@ On startup or recovery, the WAL replay engine:
 - Reads all entries into a memory index
 - Validates log ordering and checks for `TaskComplete` or `ShutdownMarker`
 - If incomplete, reconstructs TaskState:
-    - Current plan
-    - Last confirmed step index
-    - Last Git SHA
-    - Virtual canvas snapshot (if recoverable)
+  - Current plan
+  - Last confirmed step index
+  - Last Git SHA
+  - Virtual canvas snapshot (if recoverable)
 
 ### Recovery Modes
 - `resume`: continue from last known state
 - `inspect`: dry-run and summarize partial progress
 - `replay`: re-run steps for reproducibility / audit
+
+---
+
+## WAL Lifecycle Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Agent
+    participant WAL
+    participant LLM
+    participant Tool
+    participant Canvas
+    participant Git
+    participant ReplayEngine
+
+    User->>Agent: Submit task ("Add error handling")
+    Agent->>WAL: Write InstructionStart
+    Agent->>LLM: Plan steps
+    LLM-->>Agent: Return plan
+    Agent->>WAL: Write LLMPlan
+
+    loop For each step
+        Agent->>WAL: Write StepStart
+        Agent->>Tool: Execute action
+        Tool-->>Agent: Output result
+        Agent->>WAL: Write ToolResult
+        Agent->>Canvas: Apply virtual patch
+        Canvas-->>Agent: Preview diff
+        Agent->>WAL: Write PatchPreview
+        Agent->>Git: Commit via git2-rs
+        Git-->>Agent: Commit SHA
+        Agent->>WAL: Write Commit (with SHA, step index)
+    end
+
+    Agent->>WAL: Write TaskComplete
+    Agent-->>User: Respond with summary
+
+    Note over ReplayEngine: On Recovery or Restart
+    ReplayEngine->>WAL: Read task WAL file
+    WAL-->>ReplayEngine: JSON entries
+    ReplayEngine->>ReplayEngine: Rebuild plan, canvas, Git context
+    ReplayEngine->>Agent: Resume at next step or verify TaskComplete
+```
 
 ---
 
@@ -120,4 +164,4 @@ On startup or recovery, the WAL replay engine:
 ## Adopted
 This ADR is accepted as of June 2025. All agent tasks will be tracked through structured, append-only WAL files to ensure traceability, auditability, and deterministic task recovery.
 
-Maintainers: `@casibbald`, `@microscaler-team`
+Maintainers: `@casibbald`, `@microscaler-team
