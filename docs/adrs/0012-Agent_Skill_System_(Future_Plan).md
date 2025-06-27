@@ -117,7 +117,7 @@ sequenceDiagram
     participant User
     participant Orchestrator
     participant Story Planning Cluster
-    participant Development Cluster (e.g., Code Generation Agent)
+    participant Development Cluster (eg Code Generation Agent)
     participant QA Cluster
     participant Security Cluster
     participant Documentation Cluster
@@ -128,7 +128,7 @@ sequenceDiagram
     Story Planning Cluster->>TimelineDB (PAL/WAL): Record intake and refinement events
     Story Planning Cluster-->>Orchestrator: Refined stories & tasks
 
-    Orchestrator->>Development Cluster (e.g., Code Generation Agent): Execute refined tasks
+    Orchestrator->>Development Cluster (e.g Code Generation Agent): Execute refined tasks
     Development Cluster->>TimelineDB (PAL/WAL): Record code generation tasks
     Development Cluster-->>Orchestrator: Completed implementation (code, tests)
 
