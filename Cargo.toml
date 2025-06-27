@@ -1,0 +1,17 @@
+[workspace]
+members = [
+  "crates/core",
+  "crates/api",
+  "crates/cli",
+  "crates/executor",
+  "crates/scheduler",
+  "crates/canvas",
+  "crates/wal",
+  "crates/logging",
+  "crates/metrics",
+  "crates/graphdb",
+  "crates/router",
+  "crates/plugins",
+  "crates/daemon",
+]
+resolver = "2"
