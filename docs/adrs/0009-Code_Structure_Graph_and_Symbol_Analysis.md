@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -22,10 +22,10 @@ We adopt a rigorous, graph-based **Code Structure Graph strategy**, leveraging N
 
 * **AST Parsing**: Utilize Rust’s `syn` crate and `tree-sitter` for multi-language support (Rust, Python, TypeScript).
 * **Graph Mapping**: Map parsed AST nodes to a semantic graph model stored in Neo4j.
-* **Symbol Indexing**: Explicit indexing of functions, structs, traits, variables, and their dependencies.
+* **Symbol Indexing**: Explicit indexing of functions, structs, traits, variables, their documentation, types, and signatures.
 * **Integration with Git and Canvas**: Link semantic graph elements directly to commits and canvas-generated patches.
 
-### Semantic Graph Schema (Detailed):
+### Enhanced Semantic Graph Schema:
 
 ```plaintext
 (:Module)-[:DEFINES]->(:Struct|:Enum|:Trait|:Function)
@@ -35,6 +35,13 @@ We adopt a rigorous, graph-based **Code Structure Graph strategy**, leveraging N
 (:File)-[:CONTAINS]->(:Module)
 (:Commit)-[:MODIFIES]->(:File|:Symbol)
 (:Patch)-[:PROPOSED_CHANGE]->(:Symbol)
+
+Node attributes:
+- docs (parsed documentation comments)
+- signature (complete function signature)
+- parameters (list of parameter names/types)
+- returns (function return type)
+- fields (struct or enum fields/types)
 ```
 
 ---
@@ -56,8 +63,8 @@ sequenceDiagram
     Agent->>ASTParser (syn/tree-sitter): Parse Rust modules/files
     ASTParser (syn/tree-sitter)-->>Agent: AST nodes parsed
     loop For each module/file
-        Agent->>Agent: Process AST nodes into semantic graph nodes/edges
-        Agent->>GraphDB (Neo4j): Store graph nodes and edges
+        Agent->>Agent: Extract docs, signatures, types from AST nodes
+        Agent->>GraphDB (Neo4j): Store enriched semantic graph nodes and edges
     end
     GraphDB (Neo4j)-->>Agent: Confirm storage
     Agent->>VectorDB: Generate semantic embeddings (optional)
@@ -67,32 +74,12 @@ sequenceDiagram
 
 ---
 
-## 🛠️ Practical Mock Example: Simple Rust Codebase
-
-Imagine a simple Rust project consisting of three modules:
-
-**Structure:**
-
-```
-src/
-├── main.rs
-├── math/
-│   ├── mod.rs
-│   └── calculator.rs
-└── utils.rs
-```
-
-### Example Rust Code (Simplified):
+## 🛠️ Practical Mock Example: Simple Rust Codebase (Enhanced)
 
 **main.rs**
 
 ```rust
-mod math;
-mod utils;
-
-use math::calculator::Calculator;
-use utils::Logger;
-
+/// Entry point of the application
 fn main() {
     let calc = Calculator::new();
     let result = calc.add(5, 10);
@@ -103,13 +90,16 @@ fn main() {
 **math/calculator.rs**
 
 ```rust
+/// Arithmetic calculator
 pub struct Calculator;
 
 impl Calculator {
+    /// Creates a new Calculator instance
     pub fn new() -> Self {
         Calculator
     }
 
+    /// Adds two integers together
     pub fn add(&self, a: i32, b: i32) -> i32 {
         a + b
     }
@@ -119,103 +109,127 @@ impl Calculator {
 **utils.rs**
 
 ```rust
+/// Simple logging utility
 pub struct Logger;
 
 impl Logger {
+    /// Logs the provided integer value to stdout
     pub fn log(value: i32) {
         println!("Result is: {}", value);
     }
 }
 ```
 
-### 📈 Corresponding Semantic Graph Representation:
-
-**Nodes and Relationships:**
-
-* **Modules:** `main`, `math`, `utils`
-* **Structs:** `Calculator`, `Logger`
-* **Functions/Methods:** `main()`, `Calculator::new()`, `Calculator::add()`, `Logger::log()`
+### 📈 Corresponding Enhanced Semantic Graph Representation:
 
 ```plaintext
 (:Module {name:"main"})-[:USES]->(:Struct {name:"Calculator"})
 (:Module {name:"main"})-[:USES]->(:Struct {name:"Logger"})
-(:Function {name:"main"})-[:CALLS]->(:Function {name:"Calculator::new"})
-(:Function {name:"main"})-[:CALLS]->(:Function {name:"Calculator::add"})
-(:Function {name:"main"})-[:CALLS]->(:Function {name:"Logger::log"})
+(:Function {
+    name:"main",
+    docs:"Entry point of the application",
+    signature:"fn main()",
+    parameters:[],
+    returns:"()"
+})-[:CALLS]->(:Function {name:"Calculator::new"})
+  -[:CALLS]->(:Function {name:"Calculator::add"})
+  -[:CALLS]->(:Function {name:"Logger::log"})
 
-(:Module {name:"math"})-[:DEFINES]->(:Struct {name:"Calculator"})
-(:Struct {name:"Calculator"})-[:IMPLEMENTS]->(:Trait {name:"Default"}) // example trait
+(:Module {name:"math"})-[:DEFINES]->(:Struct {
+    name:"Calculator",
+    docs:"Arithmetic calculator",
+    fields:[]
+})-[:IMPLEMENTS]->(:Trait {name:"Default", docs:"Provides default constructor"})
 
-(:Function {name:"Calculator::add"})-[:USES]->(:Variable {name:"a"})
-(:Function {name:"Calculator::add"})-[:USES]->(:Variable {name:"b"})
+(:Function {
+    name:"Calculator::new",
+    docs:"Creates a new Calculator instance",
+    signature:"fn new() -> Self",
+    parameters:[],
+    returns:"Self"
+})
 
-(:Module {name:"utils"})-[:DEFINES]->(:Struct {name:"Logger"})
-(:Struct {name:"Logger"})-[:IMPLEMENTS]->(:Trait {name:"Loggable"}) // example trait
+(:Function {
+    name:"Calculator::add",
+    docs:"Adds two integers together",
+    signature:"fn add(&self, a: i32, b: i32) -> i32",
+    parameters:["&self", "a: i32", "b: i32"],
+    returns:"i32"
+})-[:USES]->(:Variable {name:"a", type:"i32"})
+  -[:USES]->(:Variable {name:"b", type:"i32"})
+
+(:Module {name:"utils"})-[:DEFINES]->(:Struct {
+    name:"Logger",
+    docs:"Simple logging utility",
+    fields:[]
+})-[:IMPLEMENTS]->(:Trait {name:"Loggable", docs:"Logging functionality trait"})
+
+(:Function {
+    name:"Logger::log",
+    docs:"Logs the provided integer value to stdout",
+    signature:"fn log(value: i32)",
+    parameters:["value: i32"],
+    returns:"()"
+})
 ```
 
-### 📊 Visual Representation (Mock):
+### 📊 Visual Representation (Enhanced):
 
 ```mermaid
 graph TD
   subgraph main module
-    main_fn[main]
+    main_fn[main - Entry point of application]
   end
 
   subgraph math module
-    calc_struct[Calculator]
-    calc_new[Calculator::new]
-    calc_add[Calculator::add]
+    calc_struct[Calculator - Arithmetic calculator]
+    calc_new[Calculator::new - Creates a new Calculator instance]
+    calc_add[Calculator::add - Adds two integers - i32 -> i32]
   end
 
   subgraph utils module
-    logger_struct[Logger]
-    logger_log[Logger::log]
+    logger_struct[Logger - Simple logging utility]
+    logger_log[Logger::log - Logs value -> i32]
   end
 
   main_fn -->|creates| calc_new
   main_fn -->|calls| calc_add
   main_fn -->|calls| logger_log
-  calc_struct -->|implements| Default_trait(Default)
-  logger_struct -->|implements| Loggable_trait(Loggable)
-  calc_add -->|uses| var_a(a)
-  calc_add -->|uses| var_b(b)
+  calc_struct -->|implements| Default_trait(Default - Provides default constructor)
+  logger_struct -->|implements| Loggable_trait(Loggable - Logging functionality trait)
+  calc_add -->|uses| var_a(a: i32)
+  calc_add -->|uses| var_b(b: i32)
 ```
+---
+
+## 🎯 Rationale for Chosen Approach (Enhanced)
+
+* **Rich Semantic Understanding:** Captures deep code structures and complete type/documentation details, enabling robust reasoning and refactoring.
+* **Enhanced Codebase Navigation:** Precise symbol resolution and dependency tracking using explicit signatures, types, and docs.
+* **Powerful Multi-Language Support:** Consistent semantic graphs enriched with detailed metadata across Rust, Python, TypeScript.
+* **Comprehensive Impact Analysis:** Supports sophisticated, semantic-aware code changes and refactoring tasks with context-rich metadata.
 
 ---
 
-## 🎯 Rationale for Chosen Approach
+## 🚨 Consequences & Trade-offs (Updated)
 
-* **Rich Semantic Understanding:** Clearly captures deep code structures, enabling robust reasoning and refactoring decisions.
-* **Enhanced Codebase Navigation:** Enables precise symbol and dependency resolution.
-* **Powerful Multi-Language Support:** Supports consistent semantic graphing across multiple programming languages (Rust, Python, TypeScript).
-* **Comprehensive Impact Analysis:** Directly supports sophisticated, semantic-aware code changes and refactoring tasks, vastly superior to current AST-only approaches.
-
----
-
-## 🚨 Consequences & Trade-offs
-
-* **Complexity:** Requires initial investment in AST parsing and semantic mapping infrastructure.
-* **Performance Overhead:** Incremental computational cost during parsing and indexing phases.
-* **Maintenance:** Requires discipline to maintain accurate semantic graphs through all code changes.
+* **Complexity:** Requires sophisticated parsing infrastructure for extracting and managing additional metadata.
+* **Performance Overhead:** Slightly increased parsing and indexing times due to enriched data storage.
+* **Maintenance:** Additional discipline required in maintaining documentation and type accuracy in semantic graphs.
 
 ---
 
-## ✅ Alternatives Considered and Dismissed
+## ✅ Alternatives Considered and Dismissed (Updated)
 
-* **Flat text indexing**: Lacks semantic depth and precise impact analysis.
-* **Pure AST analysis without semantic graphing**: Provides limited contextual reasoning.
-* **Static code analyzers without graphs**: Lack flexibility and deep semantic relationships needed for robust agentic behaviors.
-
----
-
-## 🚀 Industry-Leading Capabilities:
-
-This semantic graph and symbol analysis approach positions Tinkerbell to provide an unmatched code-understanding capability, substantially outperforming current agentic systems by enabling sophisticated, semantic reasoning and refactoring.
+* **Flat text indexing**: Insufficient depth for semantic analysis and lacks type/docs integration.
+* **Pure AST analysis without semantic graphing**: Limited contextual metadata and poor semantic querying capability.
+* **Static code analyzers without graphs**: Lacks the detailed semantic integration essential for robust agent-driven behaviors.
 
 ---
 
-## Next Steps:
+## 🚀 Industry-Leading Capabilities (Reinforced):
 
-With your confirmation, this ADR can be accepted and implemented immediately.
+This enriched semantic graph strategy positions Tinkerbell as a leader, significantly outperforming current agentic systems by providing unparalleled depth in semantic reasoning, code generation, and refactoring capabilities.
 
-✅ **Ready for review and acceptance.**
+---
+

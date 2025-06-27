@@ -30,11 +30,14 @@ This document tracks relevant Architectural Decision Records (ADRs) for the Tink
   Emphasize goals, prompts, plan recall, continuity between sessions.
 
 
-- ADR-0009: Code Structure Graph and Symbol Analysis
+- **ADR-0009**: Code Structure Graph and Symbol Analysis
   graph-based code indexing and semantic AST analysis into
+  Neo4j, enabling precise symbol tracking and refactoring intelligence.
 
 
-- ADR-0010: Task Plan Timeline and Execution Metadata
+- **ADR-0010**: Task Plan Timeline and Execution Metadata
+  Structure for task execution metadata, including plan history and decision lineage.
+  
 
 ---
 
