@@ -1,5 +1,3 @@
----
-
 ## 📌 **1. Overview of PyOS (pyos8.py)**
 
 **PyOS** is an educational, minimalistic micro-operating system implemented in Python using generators/coroutines to simulate concurrent tasks. The core features include:
@@ -245,7 +243,7 @@ impl Scheduler {
 
 ## 🚀 **Conclusion and Recommendation**
 
-Dave Beazley’s PyOS provides a clear and powerful task management blueprint. Its explicit task control, predictable 
+Dave Beazley’s PyOS provides a clear and powerful task management blueprint. Its explicit task control, predictable
 scheduling, and structured system call mechanism align extremely well with your **Tinkerbell** vision.
 
 For your Rust-based daemon, adapt these ideas into a hybrid coroutine/async system, managing tasks explicitly for predictability, clarity, and debug ease.

@@ -1,8 +1,3 @@
-Perfect. I’ll draft a technical whitepaper that blends formal architectural detail with Rust-focused engineering specificity. It will cover all systems, components, interdependencies, and runtime flow — including the Process Activity Log, sequence diagrams, and system graphs. This will serve as a comprehensive reference for future open-source contributors.
-
-I’ll let you know as soon as the document is ready for your review.
-
-
 # System Architecture and Design Overview
 
 ## Introduction
@@ -33,10 +28,10 @@ flowchart LR
     User(Client) --> |Request| API[API Interface]
     API --> |Dispatch| Core[Core Orchestrator]
     Core --> |Invoke| Executor[Execution Engine]
-    Executor -->> |Exec logs| Logger[Logging<br/>Subsystem]
-    Executor -->> |Exec metrics| Metrics[Metrics<br/>Subsystem]
-    Core --> |Record start| WAL[Process Activity Log<br/>(WAL)]
-    Core <-- |Result| Executor
+    Executor -.-> |Exec logs| Logger[Logging<br/>Subsystem]
+    Executor -.-> |Exec metrics| Metrics[Metrics<br/>Subsystem]
+    Core --> |Record start| WAL[Process Activity Log<br/>WAL]
+    Core --> |Result| Executor
     Core --> |Record finish| WAL
     Core --> |Response| API
     Logger --> |Write logs| LogFile[(Log File)]

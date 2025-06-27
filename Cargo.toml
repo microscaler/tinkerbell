@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "crates/docsbookgen",
   "crates/core",
   "crates/api",
   "crates/cli",

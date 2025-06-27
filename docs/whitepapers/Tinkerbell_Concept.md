@@ -1,8 +1,7 @@
----
-
 ## 🚧 **1. Continuous Long-running Service (Daemon-like)**
 
-Instead of starting and stopping with each CLI invocation (as many tools do), tinkerbell would be a **long-lived daemon**, preserving conversation memory, state, and cached context between interactions.
+Instead of starting and stopping with each CLI invocation (as many tools do), tinkerbell would be a **long-lived daemon**,
+preserving conversation memory, state, and cached context between interactions.
 
 * **Key Benefits:**
 
@@ -15,7 +14,7 @@ Instead of starting and stopping with each CLI invocation (as many tools do), ti
     * Use an async runtime like `tokio` for efficient task management.
     * Implement graceful startup/shutdown with state persistence.
 
----
+----
 
 ## 🔌 **2. Dual Interaction Interfaces**
 
@@ -66,7 +65,7 @@ async fn agent_request(Json(payload): Json<AgentRequest>) -> Json<AgentResponse>
 }
 ```
 
----
+----
 
 ## 📚 **3. Persistent State and Memory Management**
 
@@ -84,7 +83,7 @@ graph TD
     Runtime --> Graph["Embedded Graph DB (Neo4j)"]
 ```
 
----
+----
 
 ## ⚡️ **4. Interaction Flow (Mermaid Diagram)**
 
@@ -116,7 +115,7 @@ graph TD
     LLMRouter --> CloudLLM["Cloud LLM (optional)"]
 ```
 
----
+----
 
 ## 🛠️ **5. Deployment within Microscaller FAR (Firecracker VMs)**
 
@@ -136,7 +135,7 @@ graph TD
     User -->|CLI via local shell| FAR
 ```
 
----
+----
 
 ## 🌟 **6. Lifecycle and State Management**
 
@@ -156,7 +155,7 @@ With long-lived service design, handling graceful shutdowns, upgrades, and state
 
     * Periodic state snapshots enable fast restart or recovery from crashes.
 
----
+----
 
 ## 🚦 **7. Implementation Roadmap**
 
@@ -179,7 +178,7 @@ With long-lived service design, handling graceful shutdowns, upgrades, and state
 * Scalable FAR deployment automation.
 * Advanced memory management and intelligent hot-reloading.
 
----
+----
 
 ## 🚀 **Conclusion and Next Steps**
 

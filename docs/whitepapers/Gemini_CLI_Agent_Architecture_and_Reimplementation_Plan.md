@@ -1,10 +1,3 @@
-Great. I’ll do a comprehensive analysis of the `gemini-cli` codebase, including a full architectural breakdown with Mermaid diagrams, a detailed explanation of the `agent` module’s orchestration (local vs. remote), and a breakdown of how instructions are processed.
-
-I’ll also assess what it would take to replicate this tool in Rust using a modular LLM router like `genai-rs`, aiming for feature parity, and evaluate what key capabilities are currently missing from `gemini-cli` if one were to design a next-generation agent runtime — Tinkerbell — inside your Microscaller Firecracker Agentic Runtime.
-
-I’ll let you know as soon as the research and diagrams are ready.
-
-
 # **Gemini CLI Agent Architecture and Reimplementation Plan**
 
 ## **Local vs Remote Orchestration in Gemini CLI**
