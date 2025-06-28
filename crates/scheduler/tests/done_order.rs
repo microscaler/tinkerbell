@@ -1,5 +1,5 @@
-use scheduler::{Scheduler, SystemCall};
 use scheduler::task::TaskContext;
+use scheduler::{Scheduler, SystemCall};
 use std::time::Duration;
 
 #[test]
