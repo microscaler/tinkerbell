@@ -18,3 +18,4 @@ Build the binary entrypoint for the `tinkerbell` agent, responsible for:
 - [ ] Add placeholder config loader (`config.rs`) using `serde` + `toml`
 - [ ] Plan file-watcher support for hot-reload of config (inotify / fsevents)
 - [ ] Add integration test to spawn the daemon and shut it down gracefully
+- [ ] Replace placeholder daemon tests with a check that init and run return successfully

@@ -12,3 +12,4 @@ Ensure the `tctl` CLI can:
 - [ ] Implement basic `tctl status` command that queries `/status` endpoint
 - [ ] Add unit test that mocks an API response and verifies output formatting
 - [ ] Extend CLI help output with `--json`, `--plain` flags
+- [ ] Replace the placeholder tests in `cli/tests` with minimal integration tests for argument parsing

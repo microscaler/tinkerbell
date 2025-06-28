@@ -44,6 +44,8 @@ Complete the MVP coroutine task scheduler by:
 - [ ] Remove any logic cloning or moving the `Task` struct (it contains `JoinHandle` and is not `Clone`)
 - [ ] Add integration test that spawns two tasks and tracks their `SystemCall::Done` order
 - [ ] Confirm that scheduler exits cleanly after all tasks complete
+- [ ] Wrap the call to `may::coroutine::spawn` in an explicit `unsafe` block in `Scheduler::spawn`
+- [ ] Replace any placeholder tests with meaningful coverage for the ready queue
 
 
 ## Crate Types
