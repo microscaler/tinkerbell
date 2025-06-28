@@ -55,7 +55,7 @@ graph LR
 | Agent Status  | `tctl status`, `tctl agents`             | ✅        |
 | Logging       | `tctl logs tail`, `logs grep`            | ⏳        |
 | Secrets Mgmt  | `tctl secret add`, `secret list`         | ⏳        |
-| Help/Docs     | `tctl --help`, `--json` output           | ✅        | 
+| Help/Docs     | `tctl --help`, `--json`, `--plain`       | ✅        |
 | Lifecycle     | `tctl pause`, `tctl shutdown or restart` | ✅      |
 | Memory Access | `tctl memory show`, `memory edit`        | ⏳        |
 | Debugging     | `tctl debug`, `debug trace`              | ⏳        |
@@ -87,6 +87,10 @@ export TCTL_ADDR=vsock://3:5000
 ```bash
 # Show agent status
 tctl status
+# JSON formatted
+tctl status --json
+# Plain text
+tctl status --plain
 
 # Submit a plan
 tctl task submit --file plan.json
