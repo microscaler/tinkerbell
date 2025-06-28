@@ -38,7 +38,7 @@ impl Scheduler {
             syscall_tx: self.syscall_tx.clone(),
         };
 
-        let handle: JoinHandle<()> = may::coroutine::spawn(move || f(ctx));
+        let handle: JoinHandle<()> = unsafe { may::coroutine::spawn(move || f(ctx)) };
 
         self.tasks.insert(tid, Task { tid, handle });
         tid
