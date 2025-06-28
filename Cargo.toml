@@ -14,5 +14,6 @@ members = [
   "crates/router",
   "crates/plugins",
   "crates/daemon",
+  "crates/far-k8s-controller",
 ]
 resolver = "2"
