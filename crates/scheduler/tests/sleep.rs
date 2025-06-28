@@ -1,39 +1,31 @@
-use std::ops::Generator;
-use std::pin::Pin;
 use std::time::Duration;
+use scheduler::{
+    Scheduler,
+    syscall::SystemCall,
+    task::TaskContext,
+};
 
-use scheduler::{Scheduler, SystemCall, Task};
-use traced_test::traced_test;
-
-#[derive(Default)]
-struct SleepTest;
-
-impl SystemCall for SleepTest {
-    fn handle(self: Box<Self>, _task: &mut Task, _sched: &mut Scheduler) {
-        tracing::info!("SleepTest system call executed");
-    }
-}
-
-#[traced_test]
 #[test]
-fn test_sleep_and_resume_trace() {
+fn test_task_log_and_sleep_with_may() {
     let mut scheduler = Scheduler::new();
 
-    let sleeper = || {
-        tracing::info!("Task begins sleeping");
-        yield Box::new(scheduler::syscall::Sleep {
-            duration: Duration::from_secs(10),
+    unsafe {
+        scheduler.spawn(|ctx: TaskContext| {
+            ctx.syscall(SystemCall::Log("start task A".into()));
+            ctx.syscall(SystemCall::Sleep(Duration::from_millis(100)));
+            ctx.syscall(SystemCall::Log("resume task A".into()));
+            ctx.syscall(SystemCall::Done);
         });
-        tracing::info!("Task resumes after sleep");
-    };
+    }
 
-    scheduler.spawn(Box::new(Pin::from(sleeper)));
-    scheduler.clock.tick(Duration::from_secs(5));
-    scheduler.run(); // task should not resume
+    unsafe {
+        scheduler.spawn(|ctx: TaskContext| {
+            ctx.syscall(SystemCall::Log("start task B".into()));
+            ctx.syscall(SystemCall::Sleep(Duration::from_millis(100)));
+            ctx.syscall(SystemCall::Log("resume task B".into()));
+            ctx.syscall(SystemCall::Done);
+        });
+    }
 
-    scheduler.clock.tick(Duration::from_secs(5));
-    scheduler.run(); // task should resume
-
-    let logs = tracing::dispatcher::get_default(|d| format!("{:?}", d));
-    insta::assert_snapshot!(logs);
+    scheduler.run();
 }

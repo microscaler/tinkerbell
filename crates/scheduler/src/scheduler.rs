@@ -1,37 +1,80 @@
-use std::collections::{VecDeque, HashMap};
-use crate::{Task, TaskId};
+use std::collections::HashMap;
+use std::time::Duration;
+use crossbeam::channel::{unbounded, Receiver, RecvTimeoutError, Sender};
+use may::coroutine::JoinHandle;
+
+use crate::syscall::SystemCall;
+use crate::task::{Task, TaskContext, TaskId};
 
 pub struct Scheduler {
     next_id: TaskId,
-    ready: VecDeque<Task>,
+    syscall_tx: Sender<(TaskId, SystemCall)>,
+    syscall_rx: Receiver<(TaskId, SystemCall)>,
     tasks: HashMap<TaskId, Task>,
 }
 
 impl Scheduler {
+    /// Create a new Scheduler instance.
     pub fn new() -> Self {
+        let (syscall_tx, syscall_rx) = unbounded();
         Self {
             next_id: 1,
-            ready: VecDeque::new(),
+            syscall_tx,
+            syscall_rx,
             tasks: HashMap::new(),
         }
     }
 
-    pub fn spawn<F: FnOnce() + Send + 'static>(&mut self, f: F) -> TaskId {
+    /// Spawn a new coroutine task with a TaskContext.
+    pub unsafe fn spawn<F>(&mut self, f: F) -> TaskId
+    where
+        F: FnOnce(TaskContext) + Send + 'static,
+    {
         let tid = self.next_id;
         self.next_id += 1;
-        let task = Task::new(tid, f);
-        self.tasks.insert(tid, task);
-        self.ready.push_back(self.tasks.get(&tid).unwrap().to_owned());
+
+        let ctx = TaskContext {
+            tid,
+            syscall_tx: self.syscall_tx.clone(),
+        };
+
+        let handle: JoinHandle<()> = may::coroutine::spawn(move || f(ctx));
+
+        self.tasks.insert(tid, Task { tid, handle });
         tid
     }
 
+    /// Run the scheduler loop, processing system calls from tasks.
     pub fn run(&mut self) {
-        while let Some(task) = self.ready.pop_front() {
-            if task.is_finished() {
-                tracing::info!("Task {} finished", task.tid);
-                continue;
+        loop {
+            match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
+                Ok((tid, syscall)) => {
+                    match syscall {
+                        SystemCall::Log(msg) => tracing::info!(task = %tid, "{}", msg),
+                        SystemCall::Sleep(dur) => {
+                            tracing::info!(task = %tid, "sleeping {:?}", dur);
+                            std::thread::sleep(dur);
+                        }
+                        SystemCall::Done => {
+                            tracing::info!(task = %tid, "task done");
+                            self.tasks.remove(&tid);
+                        }
+                        SystemCall::Join(_) => {
+                            // TODO: implement join logic
+                        }
+                    }
+                }
+                Err(RecvTimeoutError::Timeout) => {
+                    tracing::warn!("scheduler idle timeout");
+                    break;
+                }
+                Err(RecvTimeoutError::Disconnected) => break,
             }
-            task.handle.join().unwrap();
+
+            if self.tasks.is_empty() {
+                tracing::info!("all tasks complete");
+                break;
+            }
         }
     }
 }

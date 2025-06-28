@@ -1,14 +1,14 @@
 # Top-level build of all crates
 build:
-    export RUSTFLAGS="-Zmacro-backtrace --cfg tokio_unstable"  cargo build --workspace
+    cargo build --workspace
 
 # Build in release mode
 build-release:
-    export RUSTFLAGS="-Zmacro-backtrace --cfg tokio_unstable"  cargo build --workspace --release
+    cargo build --workspace --release
 
 # Run all tests
 test:
-    export RUSTFLAGS="-Zmacro-backtrace --cfg tokio_unstable"  cargo test --workspace
+    cargo test --workspace
 
 # Build only docbookgen (used for mdBook + RustDoc)
 build-docbookgen:
@@ -20,7 +20,7 @@ docs:
 
 # Clean workspace
 clean:
-    export RUSTFLAGS="-Zmacro-backtrace --cfg tokio_unstable" cargo clean
+    cargo clean
 
 # Build mdBook structure using docbookgen
 docbookgen:

@@ -1,38 +1,18 @@
 use std::time::Duration;
-use crate::{Scheduler, Task, TaskId};
+use crate::TaskId;
 
+/// Represents a system call yielded by a coroutine task.
+#[derive(Debug, Clone)]
+pub enum SystemCall {
+    /// Print a log message
+    Log(String),
 
-pub struct Spawn {
-    pub task: Box<dyn Generator<Yield = Box<dyn SystemCall>, Return = ()>>,
-}
+    /// Sleep for the given duration (blocking for now)
+    Sleep(Duration),
 
-pub struct Sleep {
-    pub duration: Duration,
-}
+    /// Wait for another task to finish
+    Join(TaskId),
 
-impl SystemCall for Sleep {
-    fn handle(self: Box<Self>, task: &mut Task, sched: &mut Scheduler) {
-        sched.sleep(task.tid, self.duration);
-    }
-}
-
-pub struct WaitTask {
-    pub wait_on: TaskId,
-}
-
-pub trait SystemCall {
-    fn handle(self: Box<Self>, task: &mut Task, sched: &mut Scheduler);
-}
-
-
-impl SystemCall for WaitTask {
-    fn handle(self: Box<Self>, task: &mut Task, sched: &mut Scheduler) {
-        sched.wait_for(task.tid, self.wait_on);
-    }
-}
-
-impl SystemCall for Spawn {
-    fn handle(self: Box<Self>, _task: &mut Task, sched: &mut Scheduler) {
-        sched.spawn(self.task);
-    }
+    /// Signal that the task is complete
+    Done,
 }

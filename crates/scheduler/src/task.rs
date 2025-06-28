@@ -1,18 +1,29 @@
-use may::coroutine::{Coroutine, JoinHandle};
-use crate::TaskId;
+use crossbeam::channel::Sender;
+use crate::syscall::SystemCall;
 
+/// Unique identifier for a task.
+pub type TaskId = u64;
+
+/// A wrapper around a running coroutine and its metadata.
 pub struct Task {
     pub tid: TaskId,
-    pub handle: JoinHandle<()>,
+    pub handle: may::coroutine::JoinHandle<()>,
 }
 
-impl Task {
-    pub fn new<F: FnOnce() + Send + 'static>(tid: TaskId, f: F) -> Self {
-        let handle = Coroutine::spawn(f);
-        Self { tid, handle }
-    }
+/// Shared context passed into each task.
+///
+/// Allows tasks to submit system calls to the scheduler.
+#[derive(Clone)]
+pub struct TaskContext {
+    pub tid: TaskId,
+    pub syscall_tx: Sender<(TaskId, SystemCall)>,
+}
 
-    pub fn is_finished(&self) -> bool {
-        self.handle.is_finished()
+impl TaskContext {
+    /// Submit a system call from the current task.
+    pub fn syscall(&self, call: SystemCall) {
+        self.syscall_tx
+            .send((self.tid, call))
+            .expect("Failed to send system call");
     }
 }
