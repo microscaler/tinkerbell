@@ -12,8 +12,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Install mdBook
         run: cargo install mdbook
+
 
       - name: Run docsbookgen
         run: cargo run -p docsbookgen -- build ./docs/mdbook/
