@@ -23,5 +23,5 @@ fn test_task_log_and_sleep_with_may() {
         });
     }
 
-    scheduler.run();
+    let _ = scheduler.run();
 }
