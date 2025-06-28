@@ -1,9 +1,12 @@
-// scheduler library module
+#![feature(coroutines)]
+#![feature(generator_trait)]
+#![feature(generators)]
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert!(true);
-    }
-}
+pub mod task;
+pub mod syscall;
+pub mod scheduler;
+mod clock;
+
+pub use scheduler::Scheduler;
+pub use syscall::SystemCall;
+pub use task::{Task, TaskId};

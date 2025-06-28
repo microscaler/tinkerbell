@@ -4,3 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+tracing = "0.1"
+anyhow = "1.0"
+
+[dev-dependencies]
+traced-test = "0.1"
+insta = { version = "1.30", features = ["yaml"] }
