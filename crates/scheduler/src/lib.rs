@@ -1,6 +1,4 @@
 #![feature(coroutines)]
-#![feature(generator_trait)]
-#![feature(generators)]
 
 pub mod task;
 pub mod syscall;
