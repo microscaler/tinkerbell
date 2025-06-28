@@ -13,6 +13,7 @@ fn test_done_order() {
             ctx.syscall(SystemCall::Done);
         });
     }
+    assert_eq!(sched.ready_len(), 1);
 
     unsafe {
         // task 2 finishes first
@@ -21,7 +22,9 @@ fn test_done_order() {
             ctx.syscall(SystemCall::Done);
         });
     }
+    assert_eq!(sched.ready_len(), 2);
 
     let order = sched.run();
     assert_eq!(order, vec![2, 1]);
+    assert_eq!(sched.ready_len(), 0);
 }
