@@ -14,9 +14,9 @@ Tinkerbell is a coroutine-first autonomous agent runtime. This repo is structure
 
 2. **Task completion requires:**
     - Code
-    - Tests
     - fmt before commit (cargo fmt --all)
     - lint before commit (cargo clippy --all-targets --all-features -- -D warnings)
+    - Tests
     - README/doc update (if public API or CLI exposed)
 
 3. **You may generate new tasks** from:
