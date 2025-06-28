@@ -1,4 +1,6 @@
-use logging as _;
+use logging::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("logging", PLACEHOLDER);
+}

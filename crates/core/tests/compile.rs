@@ -1,4 +1,6 @@
-use core as _;
+use core::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("core", PLACEHOLDER);
+}

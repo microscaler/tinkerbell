@@ -1,4 +1,6 @@
-use graphdb as _;
+use graphdb::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("graphdb", PLACEHOLDER);
+}

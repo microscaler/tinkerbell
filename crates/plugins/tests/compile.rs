@@ -1,4 +1,6 @@
-use plugins as _;
+use plugins::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("plugins", PLACEHOLDER);
+}

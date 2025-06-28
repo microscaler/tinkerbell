@@ -165,6 +165,3 @@ We warmly welcome engineers, developers, architects, and enthusiasts passionate 
 
 * 📬 **[GitHub Discussions](https://github.com/microscaler/tinkerbell/discussions)**
 * 🚀 **[Open Issues](https://github.com/microscaler/tinkerbell/issues)**
-
----
-

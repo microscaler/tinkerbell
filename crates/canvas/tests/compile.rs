@@ -1,4 +1,6 @@
-use canvas as _;
+use canvas::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("canvas", PLACEHOLDER);
+}

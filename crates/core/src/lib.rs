@@ -1,1 +1,4 @@
-// core library module
+//! Core library module placeholder.
+
+/// Placeholder public constant used for compile tests.
+pub const PLACEHOLDER: &str = "core";
