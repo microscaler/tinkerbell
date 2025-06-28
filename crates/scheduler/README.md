@@ -95,7 +95,7 @@ All tests run **deterministically**. Features under test:
 * Join dependencies
 * Stack-based subcoroutines
 * Time-based blocking (`Sleep`)
-* I/O placeholder (`ReadWait`)
+* I/O wait (`IoWait`)
 * Manual signal triggering to unblock tasks
 
 Use:
@@ -114,7 +114,7 @@ cargo test -p scheduler
 * [x] Join/wait and requeueing
 * [x] Sleep system call (with tick clock or mock timer)
 * [x] Test suite for task blocking/resume logic
-* [ ] I/O wait (placeholder)
+* [x] I/O wait
 * [ ] Signal/interrupt handling
 
 ---

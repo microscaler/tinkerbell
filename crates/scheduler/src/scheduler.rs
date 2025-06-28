@@ -12,6 +12,8 @@ pub struct Scheduler {
     next_id: TaskId,
     syscall_tx: Sender<(TaskId, SystemCall)>,
     syscall_rx: Receiver<(TaskId, SystemCall)>,
+    io_tx: Sender<u64>,
+    io_rx: Receiver<u64>,
     tasks: HashMap<TaskId, Task>,
     ready: ReadyQueue,
     wait_map: WaitMap,
@@ -21,14 +23,22 @@ impl Scheduler {
     /// Create a new Scheduler instance.
     pub fn new() -> Self {
         let (syscall_tx, syscall_rx) = unbounded();
+        let (io_tx, io_rx) = unbounded();
         Self {
             next_id: 1,
             syscall_tx,
             syscall_rx,
+            io_tx,
+            io_rx,
             tasks: HashMap::new(),
             ready: ReadyQueue::new(),
             wait_map: WaitMap::new(),
         }
+    }
+
+    /// Return a handle that can be used to signal I/O readiness.
+    pub fn io_handle(&self) -> Sender<u64> {
+        self.io_tx.clone()
     }
 
     /// Return the number of tasks currently in the ready queue.
@@ -69,7 +79,27 @@ impl Scheduler {
     /// Run the scheduler loop, processing system calls from tasks.
     pub fn run(&mut self) -> Vec<TaskId> {
         let mut done_order = Vec::new();
-        while let Some(_tid) = self.ready.pop() {
+        while !self.tasks.is_empty() {
+            // process any pending I/O completions
+            while let Ok(io_id) = self.io_rx.try_recv() {
+                for tid in self.wait_map.complete_io(io_id) {
+                    self.ready.push(tid);
+                }
+            }
+
+            let _tid = match self.ready.pop() {
+                Some(id) => id,
+                None => match self.io_rx.recv_timeout(Duration::from_secs(5)) {
+                    Ok(io_id) => {
+                        for tid in self.wait_map.complete_io(io_id) {
+                            self.ready.push(tid);
+                        }
+                        continue;
+                    }
+                    Err(_) => break,
+                },
+            };
+
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
                 Ok((tid, syscall)) => {
                     let mut requeue = true;
@@ -95,6 +125,10 @@ impl Scheduler {
                                 self.wait_map.wait_for(target, tid);
                                 requeue = false;
                             }
+                        }
+                        SystemCall::IoWait(io_id) => {
+                            self.wait_map.wait_io(io_id, tid);
+                            requeue = false;
                         }
                     }
                     if requeue && self.tasks.contains_key(&tid) {
