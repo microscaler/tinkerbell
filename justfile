@@ -10,9 +10,9 @@ build-release:
 test:
     cargo test --workspace
 
-# Build only docsbookgen (used for mdBook + RustDoc)
-build-docsbookgen:
-    cargo build --package docsbookgen
+# Build only docbookgen (used for mdBook + RustDoc)
+build-docbookgen:
+    cargo build --package docbookgen
 
 # Build documentation for all crates (excluding private/no-docs)
 docs:
@@ -22,9 +22,9 @@ docs:
 clean:
     cargo clean
 
-# Build mdBook structure using docsbookgen
-docsbookgen:
-    cargo run --package docsbookgen -- build ./docs/mdbook/
+# Build mdBook structure using docbookgen
+docbookgen:
+    cargo run --package docbookgen -- build ./docs/mdbook/
 
 # Serve the mdBook locally
 serve-docs:
