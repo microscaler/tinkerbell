@@ -28,6 +28,16 @@ impl Scheduler {
         }
     }
 
+    /// Return the number of tasks currently in the ready queue.
+    pub fn ready_len(&self) -> usize {
+        self.ready.len()
+    }
+
+    /// Check if the ready queue is empty.
+    pub fn ready_is_empty(&self) -> bool {
+        self.ready.is_empty()
+    }
+
     /// Spawn a new coroutine task with a TaskContext.
     ///
     /// # Safety
@@ -56,7 +66,7 @@ impl Scheduler {
     /// Run the scheduler loop, processing system calls from tasks.
     pub fn run(&mut self) -> Vec<TaskId> {
         let mut done_order = Vec::new();
-        while !self.tasks.is_empty() {
+        while let Some(_tid) = self.ready.pop() {
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
                 Ok((tid, syscall)) => {
                     match syscall {
