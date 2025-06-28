@@ -6,6 +6,7 @@ use std::time::Duration;
 use crate::ready_queue::ReadyQueue;
 use crate::syscall::SystemCall;
 use crate::task::{Task, TaskContext, TaskId};
+use crate::wait_map::WaitMap;
 
 pub struct Scheduler {
     next_id: TaskId,
@@ -13,6 +14,7 @@ pub struct Scheduler {
     syscall_rx: Receiver<(TaskId, SystemCall)>,
     tasks: HashMap<TaskId, Task>,
     ready: ReadyQueue,
+    wait_map: WaitMap,
 }
 
 impl Scheduler {
@@ -25,6 +27,7 @@ impl Scheduler {
             syscall_rx,
             tasks: HashMap::new(),
             ready: ReadyQueue::new(),
+            wait_map: WaitMap::new(),
         }
     }
 
@@ -69,6 +72,7 @@ impl Scheduler {
         while let Some(_tid) = self.ready.pop() {
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
                 Ok((tid, syscall)) => {
+                    let mut requeue = true;
                     match syscall {
                         SystemCall::Log(msg) => tracing::info!(task = %tid, "{}", msg),
                         SystemCall::Sleep(dur) => {
@@ -80,13 +84,20 @@ impl Scheduler {
                             if let Some(task) = self.tasks.remove(&tid) {
                                 task.handle.join().expect("task join failed");
                             }
+                            for waiter in self.wait_map.complete(tid) {
+                                self.ready.push(waiter);
+                            }
                             done_order.push(tid);
+                            requeue = false;
                         }
-                        SystemCall::Join(_) => {
-                            // TODO: implement join logic
+                        SystemCall::Join(target) => {
+                            if self.tasks.contains_key(&target) {
+                                self.wait_map.wait_for(target, tid);
+                                requeue = false;
+                            }
                         }
                     }
-                    if self.tasks.contains_key(&tid) {
+                    if requeue && self.tasks.contains_key(&tid) {
                         self.ready.push(tid);
                     }
                 }
