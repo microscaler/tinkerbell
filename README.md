@@ -168,6 +168,3 @@ We warmly welcome engineers, developers, architects, and enthusiasts passionate 
 
 ---
 
-## 📢 Be part of revolutionizing autonomous software development!
-
-Tinkerbell is set to redefine how intelligent agentic systems are architected, operated, and evolved. Join us in creating the future!

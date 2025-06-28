@@ -48,5 +48,4 @@ run-cli:
 nextest-test:
     cargo nextest run --workspace --all-targets --fail-fast --retries 1
 
-nt:
-    just nextest-test
+alias nt := nextest-test
