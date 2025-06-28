@@ -33,3 +33,18 @@ serve-docs:
 # Rebuild book after content changes
 build-docsbook:
     mdbook build ./docs/mdbook/
+
+default:
+    @echo "Available commands: build, test, run-agent, run-cli"
+
+build:
+    cargo build --workspace
+
+test:
+    cargo test --workspace
+
+run-agent:
+    cargo run -p daemon --bin tinkerbell
+
+run-cli:
+    cargo run -p cli --bin tctl -- status

@@ -28,6 +28,24 @@ Tinkerbell is a coroutine-first autonomous agent runtime. This repo is structure
 
 5. **Tests must be deterministic and run under `just test`.**
 
+# Scheduler Task Refinement (MVP Fixes)
+
+## Goal
+Complete the MVP coroutine task scheduler by:
+- Converting the ready queue to a `VecDeque<TaskId>`
+- Ensuring task lookup uses `HashMap<TaskId, Task>`
+- Guaranteeing safe task handoff and wake logic
+
+## Tasks
+
+- [ ] Replace `VecDeque<Task>` with `VecDeque<TaskId>` in `scheduler.rs`
+- [ ] In `spawn()`, push the new `TaskId` into the queue — not the `Task` itself
+- [ ] In `run()`, pop a `TaskId` and `get_mut()` the task from the map
+- [ ] Remove any logic cloning or moving the `Task` struct (it contains `JoinHandle` and is not `Clone`)
+- [ ] Add integration test that spawns two tasks and tracks their `SystemCall::Done` order
+- [ ] Confirm that scheduler exits cleanly after all tasks complete
+
+
 ## Crate Types
 
 | Crate      | Type       | Notes                       |

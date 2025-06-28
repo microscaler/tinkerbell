@@ -1,4 +1,4 @@
-# 🧚 Tinkerbell 🧚 An Autonomous Agentic Development Runtime
+## 🧚 Tinkerbell 🧚 An Autonomous Agentic Development Runtime
 
 <img src="docs/images/tinkerbell.png" alt="Tinkerbell Logo" width="800"/>
 
