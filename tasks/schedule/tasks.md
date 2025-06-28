@@ -46,6 +46,7 @@ Complete the MVP coroutine task scheduler by:
 - [ ] Confirm that scheduler exits cleanly after all tasks complete
 - [ ] Wrap the call to `may::coroutine::spawn` in an explicit `unsafe` block in `Scheduler::spawn`
 - [ ] Replace any placeholder tests with meaningful coverage for the ready queue
+- [ ] Implement join waiting via a `WaitMap` so tasks blocked on `Join` resume when the joined task completes
 
 
 ## Crate Types
