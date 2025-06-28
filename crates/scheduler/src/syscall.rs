@@ -1,5 +1,5 @@
-use std::time::Duration;
 use crate::TaskId;
+use std::time::Duration;
 
 /// Represents a system call yielded by a coroutine task.
 #[derive(Debug, Clone)]

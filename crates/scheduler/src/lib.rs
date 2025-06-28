@@ -1,9 +1,9 @@
 #![feature(coroutines)]
 
-pub mod task;
-pub mod syscall;
-pub mod scheduler;
 mod clock;
+pub mod scheduler;
+pub mod syscall;
+pub mod task;
 
 pub use scheduler::Scheduler;
 pub use syscall::SystemCall;

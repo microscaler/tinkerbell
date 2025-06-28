@@ -1,9 +1,5 @@
+use scheduler::{Scheduler, syscall::SystemCall, task::TaskContext};
 use std::time::Duration;
-use scheduler::{
-    Scheduler,
-    syscall::SystemCall,
-    task::TaskContext,
-};
 
 #[test]
 fn test_task_log_and_sleep_with_may() {

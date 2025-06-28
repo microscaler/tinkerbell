@@ -1,7 +1,7 @@
+use crossbeam::channel::{Receiver, RecvTimeoutError, Sender, unbounded};
+use may::coroutine::JoinHandle;
 use std::collections::HashMap;
 use std::time::Duration;
-use crossbeam::channel::{unbounded, Receiver, RecvTimeoutError, Sender};
-use may::coroutine::JoinHandle;
 
 use crate::syscall::SystemCall;
 use crate::task::{Task, TaskContext, TaskId};

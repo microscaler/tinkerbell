@@ -26,8 +26,14 @@ fn main() {
         fs::remove_dir_all(&api_doc_path).expect("Failed to clear old API docs");
     }
     fs::create_dir_all(&api_doc_path).unwrap();
-    fs_extra::dir::copy("target/doc", &api_doc_path, &fs_extra::dir::CopyOptions::new().overwrite(true).copy_inside(true))
-        .expect("Failed to copy API docs");
+    fs_extra::dir::copy(
+        "target/doc",
+        &api_doc_path,
+        &fs_extra::dir::CopyOptions::new()
+            .overwrite(true)
+            .copy_inside(true),
+    )
+    .expect("Failed to copy API docs");
 
     // Step 3: Build mdbook (if exists)
     if mdbook_src.exists() {
@@ -47,8 +53,14 @@ fn main() {
             fs::remove_dir_all(&dest).expect("Failed to clear old mdbook");
         }
         fs::create_dir_all(&dest).unwrap();
-        fs_extra::dir::copy(&mdbook_output_path, &dest, &fs_extra::dir::CopyOptions::new().overwrite(true).copy_inside(true))
-            .expect("Failed to copy mdbook docs");
+        fs_extra::dir::copy(
+            &mdbook_output_path,
+            &dest,
+            &fs_extra::dir::CopyOptions::new()
+                .overwrite(true)
+                .copy_inside(true),
+        )
+        .expect("Failed to copy mdbook docs");
     } else {
         println!("⚠️  No docs/mdbook/ folder found — skipping mdbook build");
     }
@@ -79,7 +91,8 @@ fn main() {
 </html>
 "#;
 
-    fs::write(docbook_out.join("index.html"), index_contents).expect("Failed to write docsbook/index.html");
+    fs::write(docbook_out.join("index.html"), index_contents)
+        .expect("Failed to write docsbook/index.html");
 
     println!("✅ docsbookgen completed. Docs available in ./docsbook/");
 }
