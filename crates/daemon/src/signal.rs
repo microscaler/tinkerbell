@@ -8,9 +8,8 @@ pub fn shutdown_channel() -> anyhow::Result<Receiver<()>> {
     let (tx, rx) = bounded(1);
     let mut signals = Signals::new([SIGINT, SIGTERM])?;
     std::thread::spawn(move || {
-        for _sig in signals.forever() {
+        if let Some(_sig) = signals.forever().next() {
             let _ = tx.send(());
-            break;
         }
     });
     Ok(rx)
