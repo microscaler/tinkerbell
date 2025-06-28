@@ -37,14 +37,16 @@ build-docsbook:
 default:
     @echo "Available commands: build, test, run-agent, run-cli"
 
-build:
-    cargo build --workspace
 
-test:
-    cargo test --workspace
 
 run-agent:
     cargo run -p daemon --bin tinkerbell
 
 run-cli:
     cargo run -p cli --bin tctl -- status
+
+nextest-test:
+    cargo nextest run --workspace --all-targets --fail-fast --retries 1
+
+nt:
+    just nextest-test

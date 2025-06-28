@@ -171,8 +171,3 @@ We warmly welcome engineers, developers, architects, and enthusiasts passionate 
 ## 📢 Be part of revolutionizing autonomous software development!
 
 Tinkerbell is set to redefine how intelligent agentic systems are architected, operated, and evolved. Join us in creating the future!
-
----
-
-Let me know if this resonates, or if you'd like any adjustments! Once you're satisfied, we can commit this enriched version directly to the repo.
-
