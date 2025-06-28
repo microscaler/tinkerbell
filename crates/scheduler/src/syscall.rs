@@ -15,4 +15,7 @@ pub enum SystemCall {
 
     /// Signal that the task is complete
     Done,
+
+    /// Block until the given I/O resource is ready
+    IoWait(u64),
 }

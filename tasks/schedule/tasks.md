@@ -47,6 +47,7 @@ Complete the MVP coroutine task scheduler by:
 - [ ] Wrap the call to `may::coroutine::spawn` in an explicit `unsafe` block in `Scheduler::spawn`
 - [ ] Replace any placeholder tests with meaningful coverage for the ready queue
 - [ ] Implement join waiting via a `WaitMap` so tasks blocked on `Join` resume when the joined task completes
+- [x] Add `IoWait` syscall and resume logic using a signal channel
 
 
 ## Crate Types
