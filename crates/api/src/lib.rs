@@ -2,7 +2,7 @@
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::{sync::Notify, task::JoinHandle};
-use tonic::{transport::Server, Request, Response, Status};
+use tonic::{Request, Response, Status, transport::Server};
 
 pub mod pb {
     tonic::include_proto!("api");
@@ -16,7 +16,9 @@ struct ApiService;
 #[tonic::async_trait]
 impl Api for ApiService {
     async fn status(&self, _req: Request<Empty>) -> Result<Response<StatusReply>, Status> {
-        Ok(Response::new(StatusReply { message: "ok".into() }))
+        Ok(Response::new(StatusReply {
+            message: "ok".into(),
+        }))
     }
 
     async fn task_submit(&self, req: Request<Task>) -> Result<Response<TaskAck>, Status> {
@@ -29,30 +31,46 @@ impl Api for ApiService {
     }
 }
 
-async fn run_grpc(addr: SocketAddr, shutdown: impl std::future::Future<Output = ()>) -> anyhow::Result<()> {
+async fn run_grpc(
+    addr: SocketAddr,
+    shutdown: impl std::future::Future<Output = ()>,
+) -> anyhow::Result<()> {
     let svc = ApiServer::new(ApiService);
     Server::builder()
         .add_service(svc)
         .serve_with_shutdown(addr, shutdown)
-        .await?
-        ;
+        .await?;
     Ok(())
 }
 
 #[cfg(feature = "rest")]
-async fn run_rest(addr: SocketAddr, shutdown: impl std::future::Future<Output = ()>) -> anyhow::Result<()> {
-    use axum::{routing::{get, post}, Router};
+async fn run_rest(
+    addr: SocketAddr,
+    shutdown: impl std::future::Future<Output = ()>,
+) -> anyhow::Result<()> {
     use axum::extract::Json;
+    use axum::{
+        Router,
+        routing::{get, post},
+    };
     use serde::{Deserialize, Serialize};
 
     #[derive(Deserialize)]
-    struct TaskReq { id: String }
+    struct TaskReq {
+        id: String,
+    }
     #[derive(Serialize)]
-    struct Ack { id: String }
+    struct Ack {
+        id: String,
+    }
 
-    async fn ping() -> &'static str { "pong" }
+    async fn ping() -> &'static str {
+        "pong"
+    }
 
-    async fn status() -> &'static str { "ok" }
+    async fn status() -> &'static str {
+        "ok"
+    }
 
     async fn task(Json(task): Json<TaskReq>) -> Json<Ack> {
         Json(Ack { id: task.id })
@@ -78,7 +96,10 @@ pub fn start_api_server(addr: SocketAddr, notify: Arc<Notify>) -> JoinHandle<any
         let n = notify.clone();
         let grpc = run_grpc(addr, n.notified());
         #[cfg(feature = "rest")]
-        let rest = run_rest(SocketAddr::new(addr.ip(), addr.port() + 1), notify.notified());
+        let rest = run_rest(
+            SocketAddr::new(addr.ip(), addr.port() + 1),
+            notify.notified(),
+        );
         #[cfg(feature = "rest")]
         {
             tokio::try_join!(grpc, rest).map(|_| ())
