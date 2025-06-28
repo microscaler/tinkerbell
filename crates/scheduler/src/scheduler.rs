@@ -25,13 +25,13 @@ impl Scheduler {
         }
     }
 
-/// Spawn a new coroutine task with a TaskContext.
-///
-/// # Safety
-/// This function uses `may::coroutine::spawn`, which is unsafe because it may break Rust's safety guarantees
-/// if the spawned coroutine accesses data that is not properly synchronized or outlives its stack frame.
-/// The caller must ensure that the closure and its captured data are safe to use in this context.
-pub unsafe fn spawn<F>(&mut self, f: F) -> TaskId
+    /// Spawn a new coroutine task with a TaskContext.
+    ///
+    /// # Safety
+    /// This function uses `may::coroutine::spawn`, which is unsafe because it may break Rust's safety guarantees
+    /// if the spawned coroutine accesses data that is not properly synchronized or outlives its stack frame.
+    /// The caller must ensure that the closure and its captured data are safe to use in this context.
+    pub unsafe fn spawn<F>(&mut self, f: F) -> TaskId
     where
         F: FnOnce(TaskContext) + Send + 'static,
     {

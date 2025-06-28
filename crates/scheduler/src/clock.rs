@@ -7,16 +7,15 @@ pub struct TickClock {
 }
 
 impl TickClock {
-    
     #![allow(unused)]
     pub fn new(start: Instant) -> Self {
         Self { now: start }
     }
-    
+
     pub fn now(&self) -> Instant {
         self.now
     }
-    
+
     pub fn tick(&mut self, dur: Duration) {
         self.now += dur;
     }
