@@ -37,8 +37,6 @@ build-docsbook:
 default:
     @echo "Available commands: build, test, run-agent, run-cli"
 
-
-
 run-agent:
     cargo run -p daemon --bin tinkerbell
 

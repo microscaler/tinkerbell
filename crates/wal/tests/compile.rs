@@ -1,4 +1,6 @@
-use wal as _;
+use wal::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("wal", PLACEHOLDER);
+}

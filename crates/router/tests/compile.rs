@@ -1,4 +1,6 @@
-use router as _;
+use router::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("router", PLACEHOLDER);
+}

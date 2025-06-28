@@ -1,4 +1,6 @@
-use executor as _;
+use executor::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("executor", PLACEHOLDER);
+}

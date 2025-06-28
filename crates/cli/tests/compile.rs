@@ -1,4 +1,7 @@
-use cli as _;
+use clap::CommandFactory;
+use cli::Cli;
 
 #[test]
-fn compile() {}
+fn compile() {
+    let _cmd = Cli::command();
+}

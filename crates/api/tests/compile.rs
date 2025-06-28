@@ -1,2 +1,8 @@
+use api::pb::StatusReply;
+
 #[test]
-fn compile() {}
+fn compile() {
+    let _reply = StatusReply {
+        message: String::new(),
+    };
+}

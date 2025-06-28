@@ -1,4 +1,6 @@
-use metrics as _;
+use metrics::PLACEHOLDER;
 
 #[test]
-fn compile() {}
+fn compile() {
+    assert_eq!("metrics", PLACEHOLDER);
+}
