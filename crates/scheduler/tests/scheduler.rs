@@ -6,5 +6,5 @@ fn test_may_scheduler() {
             println!("hello from may coroutine!");
         });
     }
-    sched.run();
+    let _ = sched.run();
 }

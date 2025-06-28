@@ -3,6 +3,7 @@ use may::coroutine::JoinHandle;
 use std::collections::HashMap;
 use std::time::Duration;
 
+use crate::ready_queue::ReadyQueue;
 use crate::syscall::SystemCall;
 use crate::task::{Task, TaskContext, TaskId};
 
@@ -11,6 +12,7 @@ pub struct Scheduler {
     syscall_tx: Sender<(TaskId, SystemCall)>,
     syscall_rx: Receiver<(TaskId, SystemCall)>,
     tasks: HashMap<TaskId, Task>,
+    ready: ReadyQueue,
 }
 
 impl Scheduler {
@@ -22,6 +24,7 @@ impl Scheduler {
             syscall_tx,
             syscall_rx,
             tasks: HashMap::new(),
+            ready: ReadyQueue::new(),
         }
     }
 
@@ -46,12 +49,14 @@ impl Scheduler {
         let handle: JoinHandle<()> = unsafe { may::coroutine::spawn(move || f(ctx)) };
 
         self.tasks.insert(tid, Task { tid, handle });
+        self.ready.push(tid);
         tid
     }
 
     /// Run the scheduler loop, processing system calls from tasks.
-    pub fn run(&mut self) {
-        loop {
+    pub fn run(&mut self) -> Vec<TaskId> {
+        let mut done_order = Vec::new();
+        while !self.tasks.is_empty() {
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
                 Ok((tid, syscall)) => {
                     match syscall {
@@ -62,11 +67,17 @@ impl Scheduler {
                         }
                         SystemCall::Done => {
                             tracing::info!(task = %tid, "task done");
-                            self.tasks.remove(&tid);
+                            if let Some(task) = self.tasks.remove(&tid) {
+                                task.handle.join().expect("task join failed");
+                            }
+                            done_order.push(tid);
                         }
                         SystemCall::Join(_) => {
                             // TODO: implement join logic
                         }
+                    }
+                    if self.tasks.contains_key(&tid) {
+                        self.ready.push(tid);
                     }
                 }
                 Err(RecvTimeoutError::Timeout) => {
@@ -75,12 +86,8 @@ impl Scheduler {
                 }
                 Err(RecvTimeoutError::Disconnected) => break,
             }
-
-            if self.tasks.is_empty() {
-                tracing::info!("all tasks complete");
-                break;
-            }
         }
+        done_order
     }
 }
 

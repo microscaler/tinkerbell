@@ -28,7 +28,7 @@ The scheduler should:
 | `Task`          | A generator-style coroutine that can yield system calls       |
 | `Scheduler`     | Manages task queue, blocking map, and the main loop           |
 | `SystemCall`    | An abstract yield, e.g., `Sleep`, `Spawn`, `Join`, `Log`      |
-| `ReadyQueue`    | FIFO queue of runnable tasks                                  |
+| `ReadyQueue`    | FIFO queue of runnable tasks built on `VecDeque<TaskId>` |
 | `CallStack`     | LIFO per-task stack for nested coroutine trampolining         |
 | `WaitMap`       | Tracks join/wait conditions for resumption                    |
 
