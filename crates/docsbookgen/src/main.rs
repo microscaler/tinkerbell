@@ -70,7 +70,7 @@ fn main() {
     let style_dest = docbook_out.join("style");
     if style_src.exists() {
         fs::create_dir_all(&style_dest).expect("Failed to create docsbook/style dir");
-        fs::copy(&style_src, style_dest.join("tinkerbell.css")).expect("Failed to copy CSS");
+        fs::copy(style_src, style_dest.join("tinkerbell.css")).expect("Failed to copy CSS");
     }
 
     // Step 6: Generate a simple index.html linking to API and mdBook docs
