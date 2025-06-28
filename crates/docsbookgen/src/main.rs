@@ -53,5 +53,24 @@ fn main() {
         println!("⚠️  No docs/mdbook/ folder found — skipping mdbook build");
     }
 
+    // Step 5: Generate a simple index.html linking to API and mdBook docs
+    let index_contents = r#"<!DOCTYPE html>
+<html lang=\"en\">
+  <head>
+    <meta charset=\"utf-8\">
+    <title>Tinkerbell Documentation</title>
+  </head>
+  <body>
+    <h1>Tinkerbell Documentation</h1>
+    <ul>
+      <li><a href=\"api/index.html\">Rust API Docs</a></li>
+      <li><a href=\"md/book/index.html\">mdBook Docs</a></li>
+    </ul>
+  </body>
+</html>
+"#;
+
+    fs::write(docbook_out.join("index.html"), index_contents).expect("Failed to write docsbook/index.html");
+
     println!("✅ docsbookgen completed. Docs available in ./docsbook/");
 }
