@@ -1,6 +1,8 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
+use serial_test::serial;
 
 #[test]
+#[serial]
 fn test_join_wakes_waiter() {
     let mut sched = Scheduler::new();
 

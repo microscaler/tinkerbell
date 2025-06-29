@@ -87,7 +87,7 @@ impl Scheduler {
                 }
             }
 
-            let _tid = match self.ready.pop() {
+            let tid = match self.ready.pop() {
                 Some(id) => id,
                 None => match self.io_rx.recv_timeout(Duration::from_secs(5)) {
                     Ok(io_id) => {
@@ -100,8 +100,11 @@ impl Scheduler {
                 },
             };
 
+            let _ = self.tasks.get_mut(&tid);
+
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
-                Ok((tid, syscall)) => {
+                Ok((call_tid, syscall)) => {
+                    let tid = call_tid;
                     let mut requeue = true;
                     match syscall {
                         SystemCall::Log(msg) => tracing::info!(task = %tid, "{}", msg),
