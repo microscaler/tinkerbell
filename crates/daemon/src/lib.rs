@@ -13,6 +13,11 @@ pub fn init(cfg: Config) -> anyhow::Result<Daemon> {
     Ok(Daemon { cfg, shutdown })
 }
 
+/// Convenience wrapper to initialize and immediately run the daemon.
+pub fn run(cfg: Config) -> anyhow::Result<()> {
+    init(cfg)?.run()
+}
+
 /// Daemon state returned from [`init`].
 pub struct Daemon {
     cfg: Config,
