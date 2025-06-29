@@ -159,6 +159,11 @@ Our detailed roadmap outlines future enhancements, such as:
 
 ---
 
+## License
+
+[MPL-2.0 License][license]
+
+---
 ## 🌐 Join the Community!
 
 We warmly welcome engineers, developers, architects, and enthusiasts passionate about autonomous software development, semantic technologies, and next-generation LLMs.
