@@ -100,7 +100,7 @@ impl Scheduler {
                 },
             };
 
-            let _ = self.tasks.get_mut(&tid);
+            let _task = self.tasks.get_mut(&tid).expect("task not found");
 
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
                 Ok((call_tid, syscall)) => {
