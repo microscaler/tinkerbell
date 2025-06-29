@@ -7,9 +7,9 @@ Ensure the `tctl` CLI can:
 
 ## Tasks
 
-- [ ] In `cli/src/commands/status.rs`, add logic to connect via gRPC to the `api` crate
-- [ ] Add CLI transport abstraction in `transport.rs` to select between Unix socket and TCP
-- [ ] Implement basic `tctl status` command that queries `/status` endpoint
-- [ ] Add unit test that mocks an API response and verifies output formatting
-- [ ] Extend CLI help output with `--json`, `--plain` flags
-- [ ] Replace the placeholder tests in `cli/tests` with minimal integration tests for argument parsing
+- [x] In `cli/src/commands/status.rs`, add logic to connect via gRPC to the `api` crate
+- [x] Add CLI transport abstraction in `transport.rs` to select between Unix socket and TCP
+- [x] Implement basic `tctl status` command that queries `/status` endpoint
+- [x] Add unit test that mocks an API response and verifies output formatting
+- [x] Extend CLI help output with `--json`, `--plain` flags
+- [x] Replace the placeholder tests in `cli/tests` with minimal integration tests for argument parsing
