@@ -1,4 +1,7 @@
+use serial_test::file_serial;
+
 #[test]
+#[file_serial]
 fn test_may_scheduler() {
     let mut sched = scheduler::Scheduler::new();
     let barrier = std::sync::Arc::new(std::sync::Barrier::new(2));

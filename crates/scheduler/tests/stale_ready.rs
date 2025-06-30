@@ -1,8 +1,10 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
+use serial_test::file_serial;
 use std::sync::{Arc, Barrier};
 use std::thread;
 
 #[test]
+#[file_serial]
 fn stale_ready_id_is_ignored() {
     let mut sched = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));

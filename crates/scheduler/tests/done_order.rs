@@ -1,10 +1,12 @@
 use scheduler::task::TaskContext;
 use scheduler::{Scheduler, SystemCall};
+use serial_test::file_serial;
 use std::sync::{Arc, Barrier};
 use std::thread;
 use std::time::Duration;
 
 #[test]
+#[file_serial]
 fn test_done_order() {
     let mut sched = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));

@@ -1,9 +1,11 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
+use serial_test::file_serial;
 use std::sync::{Arc, Barrier};
 use std::thread;
 use std::time::Duration;
 
 #[test]
+#[file_serial]
 fn test_io_wait_wakes_task() {
     let mut sched = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));

@@ -1,9 +1,11 @@
 use scheduler::{Scheduler, syscall::SystemCall, task::TaskContext};
+use serial_test::file_serial;
 use std::sync::{Arc, Barrier};
 use std::thread;
 use std::time::Duration;
 
 #[test]
+#[file_serial]
 fn test_task_log_and_sleep_with_may() {
     let mut scheduler = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));
