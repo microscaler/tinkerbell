@@ -1,32 +1,41 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
+use std::sync::{Arc, Barrier};
+use std::thread;
 
 #[test]
 fn join_wake_before_next_ready() {
     let mut sched = Scheduler::new();
-    let child = unsafe {
-        sched.spawn(|ctx: TaskContext| {
-            ctx.syscall(SystemCall::Done);
-        })
-    };
+    let barrier = Arc::new(Barrier::new(2));
+    let (child, parent, order) = thread::scope(|s| {
+        let handle = unsafe { sched.start(s, barrier.clone()) };
 
-    let parent = unsafe {
-        sched.spawn(move |ctx: TaskContext| {
-            ctx.syscall(SystemCall::Join(child));
-            ctx.syscall(SystemCall::Done);
-        })
-    };
+        let child = unsafe {
+            sched.spawn(|ctx: TaskContext| {
+                ctx.syscall(SystemCall::Done);
+            })
+        };
 
-    let _third = unsafe {
-        sched.spawn(|ctx: TaskContext| {
-            ctx.syscall(SystemCall::Done);
-        })
-    };
+        let parent = unsafe {
+            sched.spawn(move |ctx: TaskContext| {
+                ctx.syscall(SystemCall::Join(child));
+                ctx.syscall(SystemCall::Done);
+            })
+        };
 
-    let order = sched.run();
+        let _third = unsafe {
+            sched.spawn(|ctx: TaskContext| {
+                ctx.syscall(SystemCall::Done);
+            })
+        };
+
+        barrier.wait();
+        let order = handle.join().unwrap();
+        (child, parent, order)
+    });
     let pos_child = order.iter().position(|&id| id == child).unwrap();
     let pos_parent = order.iter().position(|&id| id == parent).unwrap();
     assert!(
         pos_child < pos_parent,
-        "child should complete before parent"
+        "child should complete before parent",
     );
 }

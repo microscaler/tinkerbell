@@ -1,6 +1,8 @@
 use crossbeam::channel::{Receiver, RecvTimeoutError, Sender, unbounded};
 use may::coroutine::JoinHandle;
 use std::collections::HashMap;
+use std::sync::{Arc, Barrier};
+use std::thread::{Scope, ScopedJoinHandle};
 use std::time::Duration;
 
 use crate::ready_queue::ReadyQueue;
@@ -129,6 +131,32 @@ impl Scheduler {
             }
         }
         done_order
+    }
+
+    /// Start the scheduler loop on a dedicated thread.
+    ///
+    /// The provided `barrier` is used to coordinate when the loop begins.
+    /// Tasks should be spawned before the barrier is released.
+    ///
+    /// # Safety
+    /// This method spawns a thread that operates on `&mut self`. The caller
+    /// must ensure no other references to `self` are used once the barrier is
+    /// released and until the returned handle has completed.
+    pub unsafe fn start<'scope>(
+        &mut self,
+        scope: &'scope Scope<'scope, '_>,
+        barrier: Arc<Barrier>,
+    ) -> ScopedJoinHandle<'scope, Vec<TaskId>> {
+        struct Ptr(*mut Scheduler);
+        unsafe impl Send for Ptr {}
+
+        let ptr = Ptr(self as *mut Scheduler);
+        scope.spawn(move || {
+            let p = ptr;
+            barrier.wait();
+            // SAFETY: exclusive access is guaranteed after the barrier.
+            unsafe { &mut *p.0 }.run()
+        })
     }
 }
 
