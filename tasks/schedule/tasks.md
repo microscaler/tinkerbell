@@ -54,11 +54,11 @@ Complete the MVP coroutine task scheduler by:
   - [x] look at `./fix-stale-ready-ids.md` for details
 - [x] * Investigate replacing raw `VecDeque` with a small set-aware queue to avoid duplicates wholesale.
 - [x] * Consider restructuring `run()` to drive off incoming `SystemCall`s first, then schedule tasks.
-- [ ] **Implement `yield_now()`**: Introduce cooperative stepping via `TaskContext::yield_now()`
+- [x] **Implement `yield_now()`**: Introduce cooperative stepping via `TaskContext::yield_now()`
   - [ ] look at `./implement_yield.md` for details
-- [ ] **Implement `virtual_clock`**: Add a virtual clock for time-based scheduling
+- [x] **Implement `virtual_clock`**: Add a virtual clock for time-based scheduling
   - [ ] look at `./virtual_clock.md` for details
-- [ ] **Wire `IoWait` to Event Polling**: Use MIO for blocking I/O operations
+- [x] **Wire `IoWait` to Event Polling**: Use MIO for blocking I/O operations
   - [ ] look at `./io_poll.md` for details
 - [ ] **Implement `io_registry_trait` look at `./io_registry_trait.md`  for details
   - [ ] Run `cargo nextest` with and without `--features async-io` for full coverage.

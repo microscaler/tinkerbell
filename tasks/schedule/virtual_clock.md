@@ -18,16 +18,16 @@ with virtual time via `TickClock` and a min-heap (`BinaryHeap`) of sleepers.
 
 ## Steps
 
-- [ ] **Add field to `Scheduler`**
+- [x] **Add field to `Scheduler`**
 
   ```rust
   clock: TickClock,
   sleepers: BinaryHeap<(Instant, TaskId)>, // min-heap on wake time
 
 
-* [ ] **Inject `TickClock::new(Instant::now())` in `new()`**
+* [x] **Inject `TickClock::new(Instant::now())` in `new()`**
 
-* [ ] **In `SystemCall::Sleep(dur)`**
+* [x] **In `SystemCall::Sleep(dur)`**
 
   ```rust
   let wake_at = self.clock.now() + dur;
@@ -35,7 +35,7 @@ with virtual time via `TickClock` and a min-heap (`BinaryHeap`) of sleepers.
   requeue = false;
   ```
 
-* [ ] **At top of each scheduler loop**
+* [x] **At top of each scheduler loop**
 
   ```rust
   while let Some(&(wake_at, tid)) = self.sleepers.peek() {
@@ -48,11 +48,11 @@ with virtual time via `TickClock` and a min-heap (`BinaryHeap`) of sleepers.
   }
   ```
 
-* [ ] **Advance clock when idle**
+* [x] **Advance clock when idle**
 
   If no ready tasks and no IO, tick clock by shortest `wake_at - now`.
 
-* [ ] **Add test**
+* [x] **Add test**
 
   `sleep_virtual.rs` ensures `Sleep(Duration::from_millis(50))` returns without
   wall-clock delay (check elapsed real time < 5 ms).
