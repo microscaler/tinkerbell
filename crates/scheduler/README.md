@@ -50,6 +50,8 @@ yield SystemCall::Sleep(Duration::from_secs(1));
 ```
 
 The task is then moved to a timed wait queue, and resumed later by the scheduler.
+When no tasks are ready, a virtual `TickClock` advances instantly so that
+`Sleep` durations never block the thread.
 
 Tasks automatically yield back to the scheduler after each call to `TaskContext::syscall`,
 ensuring cooperative execution across all running tasks. When a task simply
