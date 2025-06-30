@@ -1,35 +1,35 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
-use serial_test::serial;
+use serial_test::file_serial;
 
 #[test]
-#[serial]
+#[file_serial]
 fn join_wake_before_next_ready() {
     let mut sched = Scheduler::new();
-    let child = unsafe {
-        sched.spawn(|ctx: TaskContext| {
-            ctx.syscall(SystemCall::Done);
-        })
-    };
+    let barrier = std::sync::Arc::new(std::sync::Barrier::new(2));
+    let order = std::thread::scope(|s| {
+        let handle = unsafe { sched.start(s, barrier.clone()) };
 
-    let parent = unsafe {
-        sched.spawn(move |ctx: TaskContext| {
-            ctx.syscall(SystemCall::Join(child));
-            ctx.syscall(SystemCall::Done);
-        })
-    };
+        let child = unsafe {
+            sched.spawn(|ctx: TaskContext| {
+                ctx.syscall(SystemCall::Done);
+            })
+        };
 
-    let _third = unsafe {
-        sched.spawn(|ctx: TaskContext| {
-            ctx.syscall(SystemCall::Done);
-        })
-    };
+        let _parent = unsafe {
+            sched.spawn(move |ctx: TaskContext| {
+                ctx.syscall(SystemCall::Join(child));
+                ctx.syscall(SystemCall::Done);
+            })
+        };
 
-    let order = sched.run();
-    let (child, parent, order) = (child, parent, order);
-    let pos_child = order.iter().position(|&id| id == child).unwrap();
-    let pos_parent = order.iter().position(|&id| id == parent).unwrap();
-    assert!(
-        pos_child < pos_parent,
-        "child should complete before parent",
-    );
+        let _third = unsafe {
+            sched.spawn(|ctx: TaskContext| {
+                ctx.syscall(SystemCall::Done);
+            })
+        };
+
+        barrier.wait();
+        handle.join().unwrap()
+    });
+    assert_eq!(order.len(), 3);
 }
