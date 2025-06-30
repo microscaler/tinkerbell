@@ -37,4 +37,19 @@ impl WaitMap {
     pub fn complete_io(&mut self, source_id: u64) -> Vec<TaskId> {
         self.io_waiters.remove(&source_id).unwrap_or_default()
     }
+
+    /// Remove a specific waiter from a target's wait list.
+    pub fn remove_waiter(&mut self, target: TaskId, waiter: TaskId) -> bool {
+        if let Some(list) = self.join_waiters.get_mut(&target)
+            && let Some(pos) = list.iter().position(|&w| w == waiter)
+        {
+            list.remove(pos);
+            if list.is_empty() {
+                self.join_waiters.remove(&target);
+            }
+            true
+        } else {
+            false
+        }
+    }
 }
