@@ -21,6 +21,11 @@ impl ReadyQueue {
         self.queue.push_back(tid);
     }
 
+    /// Returns `true` if the queue already contains `tid`.
+    pub fn contains(&self, tid: TaskId) -> bool {
+        self.queue.contains(&tid)
+    }
+
     /// Pop the next task ID from the queue.
     pub fn pop(&mut self) -> Option<TaskId> {
         self.queue.pop_front()
