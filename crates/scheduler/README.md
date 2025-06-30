@@ -143,6 +143,7 @@ Use:
 
 ```bash
 cargo test -p scheduler
+cargo test -p scheduler --features async-io
 ```
 
 ---

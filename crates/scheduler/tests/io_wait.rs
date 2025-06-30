@@ -32,3 +32,10 @@ fn test_io_wait_wakes_task() {
     });
     assert_eq!(order, vec![1]);
 }
+
+#[cfg(feature = "async-io")]
+#[test]
+#[file_serial]
+fn test_io_wait_wakes_task_async() {
+    test_io_wait_wakes_task();
+}

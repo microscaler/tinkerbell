@@ -6,6 +6,9 @@ use std::sync::{Arc, Barrier};
 use std::thread::{Scope, ScopedJoinHandle};
 use std::time::{Duration, Instant};
 
+#[cfg(feature = "async-io")]
+use mio::{Events, Poll, Token, Waker};
+
 use crate::clock::TickClock;
 use crate::ready_queue::ReadyQueue;
 use crate::syscall::SystemCall;
@@ -20,6 +23,12 @@ pub struct Scheduler {
     syscall_rx: Receiver<(TaskId, SystemCall)>,
     io_tx: Sender<u64>,
     io_rx: Receiver<u64>,
+    #[cfg(feature = "async-io")]
+    poll: Poll,
+    #[cfg(feature = "async-io")]
+    io_tokens: HashMap<u64, Token>,
+    #[cfg(feature = "async-io")]
+    io_wakers: HashMap<u64, Waker>,
     clock: TickClock,
     sleepers: BinaryHeap<Reverse<(Instant, TaskId)>>,
     tasks: HashMap<TaskId, Task>,
@@ -32,12 +41,20 @@ impl Scheduler {
     pub fn new() -> Self {
         let (syscall_tx, syscall_rx) = unbounded();
         let (io_tx, io_rx) = unbounded();
+        #[cfg(feature = "async-io")]
+        let poll = Poll::new().expect("poll");
         Self {
             next_id: 1,
             syscall_tx,
             syscall_rx,
             io_tx,
             io_rx,
+            #[cfg(feature = "async-io")]
+            poll,
+            #[cfg(feature = "async-io")]
+            io_tokens: HashMap::new(),
+            #[cfg(feature = "async-io")]
+            io_wakers: HashMap::new(),
             clock: TickClock::new(Instant::now()),
             sleepers: BinaryHeap::new(),
             tasks: HashMap::new(),
@@ -105,6 +122,11 @@ impl Scheduler {
 
             // process any pending I/O completions
             while let Ok(io_id) = self.io_rx.try_recv() {
+                #[cfg(feature = "async-io")]
+                if let Some(waker) = self.io_wakers.get(&io_id) {
+                    let _ = waker.wake();
+                }
+                #[cfg(not(feature = "async-io"))]
                 for tid in self.wait_map.complete_io(io_id) {
                     self.ready.push(tid);
                 }
@@ -120,6 +142,7 @@ impl Scheduler {
                         }
                         continue;
                     }
+                    #[cfg(not(feature = "async-io"))]
                     match self.io_rx.recv_timeout(Duration::from_secs(5)) {
                         Ok(io_id) => {
                             for tid in self.wait_map.complete_io(io_id) {
@@ -128,6 +151,26 @@ impl Scheduler {
                             continue;
                         }
                         Err(_) => break,
+                    }
+                    #[cfg(feature = "async-io")]
+                    {
+                        let timeout = Duration::from_secs(5);
+                        let mut events = Events::with_capacity(8);
+                        match self.poll.poll(&mut events, Some(timeout)) {
+                            Ok(()) => {
+                                for ev in events.iter() {
+                                    if let Some((&io_id, _)) =
+                                        self.io_tokens.iter().find(|(_, t)| **t == ev.token())
+                                    {
+                                        for tid in self.wait_map.complete_io(io_id) {
+                                            self.ready.push(tid);
+                                        }
+                                    }
+                                }
+                                continue;
+                            }
+                            Err(_) => break,
+                        }
                     }
                 }
             };
@@ -223,6 +266,15 @@ impl Scheduler {
                 }
             }
             SystemCall::IoWait(io_id) => {
+                #[cfg(feature = "async-io")]
+                {
+                    if !self.io_tokens.contains_key(&io_id) {
+                        let token = Token(self.io_tokens.len() + 1);
+                        let waker = Waker::new(self.poll.registry(), token).expect("waker");
+                        self.io_tokens.insert(io_id, token);
+                        self.io_wakers.insert(io_id, waker);
+                    }
+                }
                 self.wait_map.wait_io(io_id, tid);
                 requeue = false;
             }
