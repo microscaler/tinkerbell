@@ -21,4 +21,10 @@ pub enum SystemCall {
 
     /// Cooperatively yield control back to the scheduler
     Yield,
+
+    /// Cancel another task immediately
+    Cancel(TaskId),
+
+    /// Wait for a task to finish but resume after a timeout
+    JoinTimeout { target: TaskId, dur: Duration },
 }

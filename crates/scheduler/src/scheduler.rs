@@ -1,7 +1,7 @@
 use crossbeam::channel::{Receiver, RecvTimeoutError, Sender, unbounded};
 use may::coroutine::JoinHandle;
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::sync::{Arc, Barrier};
 use std::thread::{Scope, ScopedJoinHandle};
 use std::time::{Duration, Instant};
@@ -35,9 +35,11 @@ pub struct Scheduler {
     next_token: usize,
     clock: TickClock,
     sleepers: BinaryHeap<Reverse<(Instant, TaskId)>>,
+    timeout_waiters: BinaryHeap<Reverse<(Instant, TaskId, TaskId)>>,
     tasks: HashMap<TaskId, Task>,
     ready: ReadyQueue,
     wait_map: WaitMap,
+    cancelled: HashSet<TaskId>,
 }
 
 impl Scheduler {
@@ -64,9 +66,11 @@ impl Scheduler {
             next_token: 0,
             clock: TickClock::new(Instant::now()),
             sleepers: BinaryHeap::new(),
+            timeout_waiters: BinaryHeap::new(),
             tasks: HashMap::new(),
             ready: ReadyQueue::new(),
             wait_map: WaitMap::new(),
+            cancelled: HashSet::new(),
         }
     }
 
@@ -140,6 +144,28 @@ impl Scheduler {
                 }
             }
 
+            while let Some(&Reverse((wake_at, waiter, target))) = self.timeout_waiters.peek() {
+                if wake_at <= self.clock.now() {
+                    self.timeout_waiters.pop();
+                    if self.wait_map.remove_waiter(target, waiter) {
+                        self.ready.push(waiter);
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            while let Some(&Reverse((wake_at, waiter, target))) = self.timeout_waiters.peek() {
+                if wake_at <= self.clock.now() {
+                    self.timeout_waiters.pop();
+                    if self.wait_map.remove_waiter(target, waiter) {
+                        self.ready.push(waiter);
+                    }
+                } else {
+                    break;
+                }
+            }
+
             while let Ok((call_tid, syscall)) = self.syscall_rx.try_recv() {
                 self.handle_syscall(call_tid, syscall, &mut done_order);
             }
@@ -153,7 +179,7 @@ impl Scheduler {
             let tid = match self.ready.pop() {
                 Some(id) => id,
                 None => {
-                    if let Some(&Reverse((wake_at, _))) = self.sleepers.peek() {
+                    if let Some(wake_at) = self.next_wake_instant() {
                         if wake_at > self.clock.now() {
                             let diff = wake_at.duration_since(self.clock.now());
                             self.clock.tick(diff);
@@ -201,7 +227,7 @@ impl Scheduler {
         let mut events = Events::with_capacity(8);
         while !self.tasks.is_empty() {
             let timeout = if self.ready.is_empty() {
-                if let Some(&Reverse((wake_at, _))) = self.sleepers.peek() {
+                if let Some(wake_at) = self.next_wake_instant() {
                     let now = self.clock.now();
                     if wake_at > now {
                         wake_at - now
@@ -223,6 +249,7 @@ impl Scheduler {
             if events.is_empty()
                 && self.ready.is_empty()
                 && self.sleepers.is_empty()
+                && self.timeout_waiters.is_empty()
                 && timeout == Duration::from_secs(5)
             {
                 break;
@@ -321,6 +348,20 @@ impl Scheduler {
         self.ready.force_push(tid);
     }
 
+    fn next_wake_instant(&self) -> Option<Instant> {
+        let sleep = self.sleepers.peek().map(|Reverse((when, _))| *when);
+        let timeout = self
+            .timeout_waiters
+            .peek()
+            .map(|Reverse((when, _, _))| *when);
+        match (sleep, timeout) {
+            (Some(a), Some(b)) => Some(std::cmp::min(a, b)),
+            (Some(a), None) => Some(a),
+            (None, Some(b)) => Some(b),
+            (None, None) => None,
+        }
+    }
+
     fn handle_syscall(&mut self, tid: TaskId, syscall: SystemCall, done: &mut Vec<TaskId>) {
         let mut requeue = true;
         match syscall {
@@ -346,6 +387,25 @@ impl Scheduler {
                 if self.tasks.contains_key(&target) {
                     self.wait_map.wait_for(target, tid);
                     requeue = false;
+                }
+            }
+            SystemCall::JoinTimeout { target, dur } => {
+                if self.tasks.contains_key(&target) {
+                    self.wait_map.wait_for(target, tid);
+                    let wake_at = self.clock.now() + dur;
+                    self.timeout_waiters.push(Reverse((wake_at, tid, target)));
+                    requeue = false;
+                }
+            }
+            SystemCall::Cancel(target) => {
+                if let Some(task) = self.tasks.remove(&target) {
+                    unsafe { task.handle.coroutine().cancel() };
+                    let _ = task.handle.join();
+                    for waiter in self.wait_map.complete(target) {
+                        self.ready.push(waiter);
+                    }
+                    self.cancelled.insert(target);
+                    done.push(target);
                 }
             }
             SystemCall::IoWait(io_id) => {
