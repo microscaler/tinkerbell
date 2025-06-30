@@ -30,4 +30,9 @@ impl TaskContext {
         // `std::thread::yield_now` when not in a coroutine context.
         may::coroutine::yield_now();
     }
+
+    /// Yield back to the scheduler without performing a system call.
+    pub fn yield_now(&self) {
+        self.syscall(SystemCall::Yield);
+    }
 }
