@@ -12,10 +12,11 @@ use mio::{Events, Interest, Poll, Token, unix::SourceFd};
 use crate::clock::TickClock;
 #[cfg(feature = "async-io")]
 use crate::io::IoSource;
+use crate::pal::{self, TaskEvent};
 use crate::ready_queue::ReadyEntry;
 use crate::ready_queue::ReadyQueue;
 use crate::syscall::SystemCall;
-use crate::task::{Task, TaskContext, TaskId};
+use crate::task::{Task, TaskContext, TaskId, TaskState};
 use crate::wait_map::WaitMap;
 
 /// Core runtime orchestrator managing runnable tasks, pending I/O events,
@@ -42,6 +43,7 @@ pub struct Scheduler {
     ready: ReadyQueue,
     wait_map: WaitMap,
     cancelled: HashSet<TaskId>,
+    states: HashMap<TaskId, TaskState>,
 }
 
 impl Scheduler {
@@ -74,6 +76,7 @@ impl Scheduler {
             ready: ReadyQueue::new(),
             wait_map: WaitMap::new(),
             cancelled: HashSet::new(),
+            states: HashMap::new(),
         }
     }
 
@@ -128,7 +131,16 @@ impl Scheduler {
 
         let handle: JoinHandle<()> = unsafe { may::coroutine::spawn(move || f(ctx)) };
 
-        self.tasks.insert(tid, Task { tid, pri, handle });
+        self.states.insert(tid, TaskState::Running);
+        self.tasks.insert(
+            tid,
+            Task {
+                tid,
+                pri,
+                handle,
+                state: TaskState::Running,
+            },
+        );
         let entry = ReadyEntry {
             pri,
             seq: self.seq,
@@ -414,10 +426,23 @@ impl Scheduler {
             }
             SystemCall::Done => {
                 tracing::info!(task = %tid, "task done");
-                if let Some(task) = self.tasks.remove(&tid) {
-                    task.handle.join().expect("task join failed");
-                }
-                for waiter in self.wait_map.complete(tid) {
+                let state = if let Some(task) = self.tasks.remove(&tid) {
+                    let res = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                        task.handle.join()
+                    }));
+                    match res {
+                        Ok(Ok(_)) => TaskState::Finished,
+                        _ => {
+                            pal::emit(TaskEvent::Failed(tid));
+                            TaskState::Failed
+                        }
+                    }
+                } else {
+                    TaskState::Finished
+                };
+                self.states.insert(tid, state);
+                let (waiters, _) = self.wait_map.complete(tid, state);
+                for waiter in waiters {
                     self.push_ready(waiter);
                 }
                 done.push(tid);
@@ -441,7 +466,9 @@ impl Scheduler {
                 if let Some(task) = self.tasks.remove(&target) {
                     unsafe { task.handle.coroutine().cancel() };
                     let _ = task.handle.join();
-                    for waiter in self.wait_map.complete(target) {
+                    self.states.insert(target, TaskState::Finished);
+                    let (waiters, _) = self.wait_map.complete(target, TaskState::Finished);
+                    for waiter in waiters {
                         self.push_ready(waiter);
                     }
                     self.cancelled.insert(target);
@@ -459,5 +486,10 @@ impl Scheduler {
         if requeue && self.tasks.contains_key(&tid) {
             self.push_ready(tid);
         }
+    }
+
+    /// Retrieve the recorded state of a task if known.
+    pub fn task_state(&self, tid: TaskId) -> Option<TaskState> {
+        self.states.get(&tid).copied()
     }
 }

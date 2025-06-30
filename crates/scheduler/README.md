@@ -31,6 +31,7 @@ The scheduler should:
 | `ReadyQueue`    | Priority queue of runnable tasks built on `BinaryHeap<ReadyEntry>` |
 | `CallStack`     | LIFO per-task stack for nested coroutine trampolining |
 | `WaitMap`       | Tracks join/wait conditions for resumption |
+| `TaskState`     | Lifecycle status: `Running`, `Finished`, or `Failed` |
 | `ready_len()`   | Inspect number of tasks currently queued |
 
 ---
