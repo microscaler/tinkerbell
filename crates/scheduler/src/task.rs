@@ -25,12 +25,9 @@ impl TaskContext {
         self.syscall_tx
             .send((self.tid, call))
             .expect("Failed to send system call");
-        // Yield after sending the syscall to give the scheduler a chance to
-        // process it immediately. This keeps task execution deterministic when
-        // multiple tasks are contending for the scheduler.
+        // Yield after sending the syscall so the scheduler can handle it
+        // promptly. `may::coroutine::yield_now` already falls back to
+        // `std::thread::yield_now` when not in a coroutine context.
         may::coroutine::yield_now();
-        // Fallback to OS thread yielding for environments where the `may`
-        // runtime might not actively schedule.
-        std::thread::yield_now();
     }
 }
