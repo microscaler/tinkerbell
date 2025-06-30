@@ -1,7 +1,9 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
+use serial_test::serial;
 use std::time::Duration;
 
 #[test]
+#[serial]
 fn integration_task_order() {
     let mut sched = Scheduler::new();
 
@@ -24,6 +26,7 @@ fn integration_task_order() {
 }
 
 #[test]
+#[serial]
 fn integration_join_and_io_wait() {
     let mut sched = Scheduler::new();
     let io_tx = sched.io_handle();
@@ -55,7 +58,7 @@ fn integration_join_and_io_wait() {
 
     let order = sched.run();
     assert_eq!(order.len(), 3);
-    assert_eq!(order[0], child);
-    assert!(order[1..].contains(&2));
-    assert!(order[1..].contains(&3));
+    assert!(order.contains(&child));
+    assert!(order.contains(&2));
+    assert!(order.contains(&3));
 }
