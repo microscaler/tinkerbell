@@ -388,6 +388,7 @@ impl Scheduler {
         self.seq += 1;
     }
 
+    /// Insert `tid` into the ready queue respecting its priority.
     fn push_ready(&mut self, tid: TaskId) {
         if let Some(task) = self.tasks.get(&tid) {
             let entry = ReadyEntry {
@@ -400,6 +401,7 @@ impl Scheduler {
         }
     }
 
+    /// Return the earliest instant at which a sleeping task should be woken.
     fn next_wake_instant(&self) -> Option<Instant> {
         let sleep = self.sleepers.peek().map(|Reverse((when, _))| *when);
         let timeout = self
@@ -414,6 +416,7 @@ impl Scheduler {
         }
     }
 
+    /// Process a syscall emitted by `tid`, updating scheduler state and queueing follow-up work.
     fn handle_syscall(&mut self, tid: TaskId, syscall: SystemCall, done: &mut Vec<TaskId>) {
         let mut requeue = true;
         match syscall {
