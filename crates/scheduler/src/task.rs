@@ -12,6 +12,19 @@ pub struct Task {
     pub pri: u8,
     /// Coroutine handle backing the task.
     pub handle: may::coroutine::JoinHandle<()>,
+    /// Current lifecycle state of the task.
+    pub state: TaskState,
+}
+
+/// Represents the lifecycle state of a task.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum TaskState {
+    /// The task is currently running or ready to run.
+    Running,
+    /// The task completed successfully.
+    Finished,
+    /// The task terminated due to a panic.
+    Failed,
 }
 
 /// Shared context passed into each task.

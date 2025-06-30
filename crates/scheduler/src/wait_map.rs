@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::task::TaskId;
+use crate::task::{TaskId, TaskState};
 
 /// Map of tasks waiting on other tasks to complete.
 #[derive(Default)]
@@ -23,9 +23,10 @@ impl WaitMap {
         self.join_waiters.entry(target).or_default().push(waiter);
     }
 
-    /// Notify tasks waiting on `target`, returning the list of waiters.
-    pub fn complete(&mut self, target: TaskId) -> Vec<TaskId> {
-        self.join_waiters.remove(&target).unwrap_or_default()
+    /// Notify tasks waiting on `target`, returning the list of waiters and the
+    /// task's completion state.
+    pub fn complete(&mut self, target: TaskId, state: TaskState) -> (Vec<TaskId>, TaskState) {
+        (self.join_waiters.remove(&target).unwrap_or_default(), state)
     }
 
     /// Record that `waiter` is waiting for the I/O resource `source_id`.

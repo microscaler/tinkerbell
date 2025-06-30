@@ -2,6 +2,7 @@
 
 mod clock;
 pub mod io;
+mod pal;
 pub mod ready_queue;
 pub mod scheduler;
 pub mod syscall;
@@ -9,6 +10,7 @@ pub mod task;
 mod wait_map;
 
 pub use io::IoSource;
+pub use pal::{TaskEvent, emit as pal_emit};
 pub use ready_queue::{ReadyEntry, ReadyQueue};
 pub use scheduler::Scheduler;
 pub use syscall::SystemCall;
