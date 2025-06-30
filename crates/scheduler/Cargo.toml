@@ -8,6 +8,7 @@ may = "0.3"
 tracing = "0.1"
 anyhow = "1.0"
 crossbeam = "0.8"
+mio = { version = "1.0.4", features = ["net", "os-ext", "os-poll"] }
 
 [dev-dependencies]
 traced-test = "0.1"
