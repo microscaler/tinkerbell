@@ -1,16 +1,11 @@
 use scheduler::task::TaskContext;
 use scheduler::{Scheduler, SystemCall};
-use std::sync::{Arc, Barrier};
-use std::thread;
 use std::time::Duration;
 
 #[test]
 fn test_done_order() {
     let mut sched = Scheduler::new();
-    let barrier = Arc::new(Barrier::new(2));
-    let order = thread::scope(|s| {
-        let handle = unsafe { sched.start(s, barrier.clone()) };
-
+    let order = {
         unsafe {
             // task 1 sleeps longer so finishes second
             sched.spawn(|ctx: TaskContext| {
@@ -29,9 +24,8 @@ fn test_done_order() {
         }
         assert_eq!(sched.ready_len(), 2);
 
-        barrier.wait();
-        handle.join().unwrap()
-    });
+        sched.run()
+    };
     assert_eq!(order, vec![2, 1]);
     assert_eq!(sched.ready_len(), 0);
 }
