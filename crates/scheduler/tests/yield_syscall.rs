@@ -1,30 +1,30 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
+use serial_test::serial;
 use std::sync::{Arc, Barrier};
 use std::thread;
-use std::time::Duration;
 
 #[test]
-fn test_io_wait_wakes_task() {
+#[serial]
+fn syscall_yield_order() {
     let mut sched = Scheduler::new();
-    let io_tx = sched.io_handle();
     let barrier = Arc::new(Barrier::new(2));
     let order = thread::scope(|s| {
         let handle = unsafe { sched.start(s, barrier.clone()) };
 
         unsafe {
             sched.spawn(|ctx: TaskContext| {
-                ctx.syscall(SystemCall::IoWait(1));
                 ctx.syscall(SystemCall::Done);
             });
         }
 
-        thread::spawn(move || {
-            thread::sleep(Duration::from_millis(50));
-            io_tx.send(1).unwrap();
-        });
+        unsafe {
+            sched.spawn(|ctx: TaskContext| {
+                ctx.syscall(SystemCall::Done);
+            });
+        }
 
         barrier.wait();
         handle.join().unwrap()
     });
-    assert_eq!(order, vec![1]);
+    assert_eq!(order, vec![1, 2]);
 }

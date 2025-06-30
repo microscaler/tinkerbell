@@ -25,5 +25,14 @@ impl TaskContext {
         self.syscall_tx
             .send((self.tid, call))
             .expect("Failed to send system call");
+        // Yield after sending the system call so the scheduler can
+        // immediately process it. We prefer `may::coroutine::yield_now` when
+        // running inside a coroutine, but fall back to the standard thread
+        // yield if called from a normal thread context.
+        if may::coroutine::is_coroutine() {
+            may::coroutine::yield_now();
+        } else {
+            std::thread::yield_now();
+        }
     }
 }
