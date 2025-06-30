@@ -94,4 +94,3 @@ its `tid` is still in the queue, the lookup panics.
 
 * Investigate replacing raw `VecDeque` with a small set-aware queue to avoid duplicates wholesale.
 * Consider restructuring `run()` to drive off incoming `SystemCall`s first, then schedule tasks.
-
