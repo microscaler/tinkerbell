@@ -163,7 +163,40 @@ crates/scheduler/
 | Replayable     | Future: WAL hook for recording yields         |
 
 ---
+### 🛣️ Scheduler Roadmap — Next Milestones
 
+*(moving from “it works” ⇒ “production-ready, PyOS8-inspired”)*
+
+| Phase | Focus Area                    | Why It Matters                                                                                                                        | Concrete Next Tasks                                                                                                                                                                    |
+| ----- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **True cooperative stepping** | Right now we drive purely from blocking `recv_timeout`. PyOS8 yields back to the scheduler **every time the coroutine uses `yield`**. | • Refactor `TaskContext` to expose an explicit `yield_now()`<br>• Replace `std::thread::sleep` in `SystemCall::Sleep` with inserting a `(wake_at, tid)` into a timed wheel / min-heap. |
+| **2** | **TickClock & virtual time**  | Deterministic tests + future timeouts without wall-clock sleeps.                                                                      | • Wire `TickClock` into `Scheduler` (inject during tests).<br>• Create a `sleep_heap: BinaryHeap<(Instant, TaskId)>`.<br>• Add `tick()` path to pop ready sleepers.                    |
+| **3** | **I/O poll abstraction**      | Real async runtime needs readiness events (Fd / network).                                                                             | • Introduce trait `IoSource { fn ready(&self) -> u64 }`.<br>• Map `SystemCall::IoWait` to epoll/kqueue (behind feature).                                                               |
+| **4** | **Cancellation & timeouts**   | PyOS8 supports cancelling tasks via “kill task id”.                                                                                   | • Add `SystemCall::Cancel(target)`. <br>• Store `cancelled: HashSet<TaskId>` and drop tasks gracefully.                                                                                |
+| **5** | **Priority & fairness**       | Some agents (e.g., WAL flusher) must pre-empt heavy compute.                                                                          | • Replace FIFO `ReadyQueue` with (`priority, tid`) binary-heap.<br>• Expose `spawn_with_priority(priority, f)` API.                                                                    |
+| **6** | **Error & panic isolation**   | Panicking inside a coroutine shouldn’t crash scheduler.                                                                               | • Wrap `handle.join()` in `catch_unwind`; emit PAL entry.<br>• Bubble failure to any `Join` waiters with an error code.                                                                |
+| **7** | **Supervisor tasks**          | PyOS8 supervises children; Tiffany needs same for WAL/PAL.                                                                            | • Add “system” tasks started at boot (metrics flush, GC).                                                                                                                              |
+| **8** | **Instrumentation**           | We’ll plug metric spans + event hooks into PAL & Prometheus.                                                                          | • Emit `tracing` span per `run()` cycle.<br>• Counter: `scheduler_ready_queue_depth`.<br>• Histogram: task run-to-completion latency.                                                  |
+
+
+---
+
+### 📚 Reference to David Beazley’s PyOS8 Features to Mirror
+
+| PyOS8 Concept                                           | Tiffany Parity               |
+| ------------------------------------------------------- | ---------------------------- |
+| `yield` returns a syscall tuple                         | our `ctx.syscall(...)`       |
+| Scheduler maintains *ready*, *sleeping*, *waiting* maps | already present, will expand |
+| `select` loop for I/O readiness                         | planned in Phase 3           |
+| Task cancellation via exception injection               | Phase 4                      |
+| Timers advancing virtual clock                          | Phase 2                      |
+
+---
+
+With these phases complete, Tiffany’s scheduler moves from **PoC** to a **tiny cooperative micro-kernel** capable of orchestrating thousands of lightweight in-VM tasks deterministically and observably.
+
+
+---
 ## 🧩 Future Integrations
 
 Once the scheduler is hardened and verified:
