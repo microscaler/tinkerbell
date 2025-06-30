@@ -52,6 +52,9 @@ Complete the MVP coroutine task scheduler by:
 ## Critical Task Dependencies
 - [ ] **Fix Stale Ready IDs**: Ensure the scheduler ignores stale task IDs in the ready queue
   - [ ] look at `./fix-stale-ready-ids.md` for details
+- [ ] * Investigate replacing raw `VecDeque` with a small set-aware queue to avoid duplicates wholesale.
+- [ ] * Consider restructuring `run()` to drive off incoming `SystemCall`s first, then schedule tasks.
+
 
 
 ## Crate Types
