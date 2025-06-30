@@ -38,15 +38,15 @@ Complete the MVP coroutine task scheduler by:
 
 ## Tasks
 
-- [ ] Replace `VecDeque<Task>` with `VecDeque<TaskId>` in `scheduler.rs`
-- [ ] In `spawn()`, push the new `TaskId` into the queue — not the `Task` itself
-- [ ] In `run()`, pop a `TaskId` and `get_mut()` the task from the map
-- [ ] Remove any logic cloning or moving the `Task` struct (it contains `JoinHandle` and is not `Clone`)
-- [ ] Add integration test that spawns two tasks and tracks their `SystemCall::Done` order
-- [ ] Confirm that scheduler exits cleanly after all tasks complete
-- [ ] Wrap the call to `may::coroutine::spawn` in an explicit `unsafe` block in `Scheduler::spawn`
-- [ ] Replace any placeholder tests with meaningful coverage for the ready queue
-- [ ] Implement join waiting via a `WaitMap` so tasks blocked on `Join` resume when the joined task completes
+- [x] Replace `VecDeque<Task>` with `VecDeque<TaskId>` in `scheduler.rs`
+- [x] In `spawn()`, push the new `TaskId` into the queue — not the `Task` itself
+- [x] In `run()`, pop a `TaskId` and `get_mut()` the task from the map
+- [x] Remove any logic cloning or moving the `Task` struct (it contains `JoinHandle` and is not `Clone`)
+- [x] Add integration test that spawns two tasks and tracks their `SystemCall::Done` order
+- [x] Confirm that scheduler exits cleanly after all tasks complete
+- [x] Wrap the call to `may::coroutine::spawn` in an explicit `unsafe` block in `Scheduler::spawn`
+- [x] Replace any placeholder tests with meaningful coverage for the ready queue
+- [x] Implement join waiting via a `WaitMap` so tasks blocked on `Join` resume when the joined task completes
 - [x] Add `IoWait` syscall and resume logic using a signal channel
 
 ## Critical Task Dependencies
