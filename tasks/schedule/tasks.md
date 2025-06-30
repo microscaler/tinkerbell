@@ -49,6 +49,10 @@ Complete the MVP coroutine task scheduler by:
 - [ ] Implement join waiting via a `WaitMap` so tasks blocked on `Join` resume when the joined task completes
 - [x] Add `IoWait` syscall and resume logic using a signal channel
 
+## Critical Task Dependencies
+- [ ] **Fix Stale Ready IDs**: Ensure the scheduler ignores stale task IDs in the ready queue
+  - [ ] look at `./fix-stale-ready-ids.md` for details
+
 
 ## Crate Types
 
@@ -70,3 +74,6 @@ Complete the MVP coroutine task scheduler by:
 - When in doubt, log to PAL-compatible format.
 
 Happy contributing 🧚
+
+
+
