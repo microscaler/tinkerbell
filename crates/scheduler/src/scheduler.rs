@@ -7,7 +7,7 @@ use std::thread::{Scope, ScopedJoinHandle};
 use std::time::{Duration, Instant};
 
 #[cfg(feature = "async-io")]
-use mio::{Events, Interest, Poll, Token, Waker, unix::SourceFd};
+use mio::{Events, Interest, Poll, Token, unix::SourceFd};
 
 use crate::clock::TickClock;
 #[cfg(feature = "async-io")]
@@ -23,16 +23,16 @@ pub struct Scheduler {
     next_id: TaskId,
     syscall_tx: Sender<(TaskId, SystemCall)>,
     syscall_rx: Receiver<(TaskId, SystemCall)>,
+    #[cfg(not(feature = "async-io"))]
     io_tx: Sender<u64>,
+    #[cfg(not(feature = "async-io"))]
     io_rx: Receiver<u64>,
     #[cfg(feature = "async-io")]
     poll: Poll,
     #[cfg(feature = "async-io")]
-    io_tokens: HashMap<u64, Token>,
+    sources: HashMap<Token, Arc<dyn IoSource>>,
     #[cfg(feature = "async-io")]
-    io_wakers: HashMap<u64, Waker>,
-    #[cfg(feature = "async-io")]
-    sources: HashMap<u64, Arc<dyn IoSource>>,
+    next_token: usize,
     clock: TickClock,
     sleepers: BinaryHeap<Reverse<(Instant, TaskId)>>,
     tasks: HashMap<TaskId, Task>,
@@ -44,6 +44,7 @@ impl Scheduler {
     /// Create a new Scheduler instance.
     pub fn new() -> Self {
         let (syscall_tx, syscall_rx) = unbounded();
+        #[cfg(not(feature = "async-io"))]
         let (io_tx, io_rx) = unbounded();
         #[cfg(feature = "async-io")]
         let poll = Poll::new().expect("poll");
@@ -51,16 +52,16 @@ impl Scheduler {
             next_id: 1,
             syscall_tx,
             syscall_rx,
+            #[cfg(not(feature = "async-io"))]
             io_tx,
+            #[cfg(not(feature = "async-io"))]
             io_rx,
             #[cfg(feature = "async-io")]
             poll,
             #[cfg(feature = "async-io")]
-            io_tokens: HashMap::new(),
-            #[cfg(feature = "async-io")]
-            io_wakers: HashMap::new(),
-            #[cfg(feature = "async-io")]
             sources: HashMap::new(),
+            #[cfg(feature = "async-io")]
+            next_token: 0,
             clock: TickClock::new(Instant::now()),
             sleepers: BinaryHeap::new(),
             tasks: HashMap::new(),
@@ -69,7 +70,9 @@ impl Scheduler {
         }
     }
 
-    /// Return a handle that can be used to signal I/O readiness.
+    /// Return a handle that can be used to signal I/O readiness when
+    /// `async-io` is disabled.
+    #[cfg(not(feature = "async-io"))]
     pub fn io_handle(&self) -> Sender<u64> {
         self.io_tx.clone()
     }
@@ -77,16 +80,15 @@ impl Scheduler {
     /// Register a new I/O source with the scheduler.
     #[cfg(feature = "async-io")]
     pub fn register_io(&mut self, src: Arc<dyn IoSource>) {
-        let id = src.id();
-        let token = Token(self.io_tokens.len() + 1);
+        let token = Token(self.next_token);
+        self.next_token += 1;
         let fd = src.raw_fd();
         let mut source = SourceFd(&fd);
         self.poll
             .registry()
             .register(&mut source, token, Interest::READABLE)
             .expect("register io source");
-        self.sources.insert(id, src);
-        self.io_tokens.insert(id, token);
+        self.sources.insert(token, src);
     }
 
     /// Return the number of tasks currently in the ready queue.
@@ -125,6 +127,7 @@ impl Scheduler {
     }
 
     /// Run the scheduler loop, processing system calls from tasks.
+    #[cfg(not(feature = "async-io"))]
     pub fn run(&mut self) -> Vec<TaskId> {
         let mut done_order = Vec::new();
         while !self.tasks.is_empty() {
@@ -136,18 +139,12 @@ impl Scheduler {
                     break;
                 }
             }
-            // handle all pending system calls first
+
             while let Ok((call_tid, syscall)) = self.syscall_rx.try_recv() {
                 self.handle_syscall(call_tid, syscall, &mut done_order);
             }
 
-            // process any pending I/O completions
             while let Ok(io_id) = self.io_rx.try_recv() {
-                #[cfg(feature = "async-io")]
-                if let Some(waker) = self.io_wakers.get(&io_id) {
-                    let _ = waker.wake();
-                }
-                #[cfg(not(feature = "async-io"))]
                 for tid in self.wait_map.complete_io(io_id) {
                     self.ready.push(tid);
                 }
@@ -163,7 +160,6 @@ impl Scheduler {
                         }
                         continue;
                     }
-                    #[cfg(not(feature = "async-io"))]
                     match self.io_rx.recv_timeout(Duration::from_secs(5)) {
                         Ok(io_id) => {
                             for tid in self.wait_map.complete_io(io_id) {
@@ -173,31 +169,97 @@ impl Scheduler {
                         }
                         Err(_) => break,
                     }
-                    #[cfg(feature = "async-io")]
-                    {
-                        let timeout = Duration::from_secs(5);
-                        let mut events = Events::with_capacity(8);
-                        match self.poll.poll(&mut events, Some(timeout)) {
-                            Ok(()) => {
-                                for ev in events.iter() {
-                                    if let Some((&io_id, _)) =
-                                        self.io_tokens.iter().find(|(_, t)| **t == ev.token())
-                                    {
-                                        for tid in self.wait_map.complete_io(io_id) {
-                                            self.ready.push(tid);
-                                        }
-                                    }
-                                }
-                                continue;
-                            }
-                            Err(_) => break,
-                        }
-                    }
                 }
             };
 
             if !self.tasks.contains_key(&tid) {
-                // Stale ID—task already removed after Done; skip.
+                continue;
+            }
+
+            let _task = self.tasks.get_mut(&tid).expect("task not found");
+
+            match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
+                Ok((call_tid, syscall)) => {
+                    if call_tid != tid && self.tasks.contains_key(&tid) {
+                        self.ready.push(tid);
+                    }
+                    self.handle_syscall(call_tid, syscall, &mut done_order);
+                }
+                Err(RecvTimeoutError::Timeout) => {
+                    tracing::warn!("scheduler idle timeout");
+                    break;
+                }
+                Err(RecvTimeoutError::Disconnected) => break,
+            }
+        }
+        done_order
+    }
+
+    #[cfg(feature = "async-io")]
+    pub fn run(&mut self) -> Vec<TaskId> {
+        let mut done_order = Vec::new();
+        let mut events = Events::with_capacity(8);
+        while !self.tasks.is_empty() {
+            let timeout = if self.ready.is_empty() {
+                if let Some(&Reverse((wake_at, _))) = self.sleepers.peek() {
+                    let now = self.clock.now();
+                    if wake_at > now {
+                        wake_at - now
+                    } else {
+                        Duration::ZERO
+                    }
+                } else {
+                    Duration::from_secs(5)
+                }
+            } else {
+                Duration::ZERO
+            };
+
+            if let Err(e) = self.poll.poll(&mut events, Some(timeout)) {
+                tracing::warn!(?e, "poll error");
+                break;
+            }
+
+            if events.is_empty()
+                && self.ready.is_empty()
+                && self.sleepers.is_empty()
+                && timeout == Duration::from_secs(5)
+            {
+                break;
+            }
+
+            if events.is_empty() && self.ready.is_empty() && timeout > Duration::ZERO {
+                self.clock.tick(timeout);
+            }
+
+            for ev in events.iter() {
+                if let Some(src) = self.sources.get(&ev.token()) {
+                    for tid in self.wait_map.complete_io(src.id()) {
+                        self.ready.push(tid);
+                    }
+                }
+            }
+            events.clear();
+
+            while let Some(&Reverse((wake_at, tid))) = self.sleepers.peek() {
+                if wake_at <= self.clock.now() {
+                    self.sleepers.pop();
+                    self.ready.push(tid);
+                } else {
+                    break;
+                }
+            }
+
+            while let Ok((call_tid, syscall)) = self.syscall_rx.try_recv() {
+                self.handle_syscall(call_tid, syscall, &mut done_order);
+            }
+
+            let tid = match self.ready.pop() {
+                Some(id) => id,
+                None => continue,
+            };
+
+            if !self.tasks.contains_key(&tid) {
                 continue;
             }
 
@@ -287,15 +349,6 @@ impl Scheduler {
                 }
             }
             SystemCall::IoWait(io_id) => {
-                #[cfg(feature = "async-io")]
-                {
-                    if !self.io_tokens.contains_key(&io_id) {
-                        let token = Token(self.io_tokens.len() + 1);
-                        let waker = Waker::new(self.poll.registry(), token).expect("waker");
-                        self.io_tokens.insert(io_id, token);
-                        self.io_wakers.insert(io_id, waker);
-                    }
-                }
                 self.wait_map.wait_io(io_id, tid);
                 requeue = false;
             }

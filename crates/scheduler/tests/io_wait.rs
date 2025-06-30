@@ -1,9 +1,12 @@
+#![cfg(not(feature = "async-io"))]
+
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
 use serial_test::file_serial;
 use std::sync::{Arc, Barrier};
 use std::thread;
 use std::time::Duration;
 
+#[cfg(not(feature = "async-io"))]
 #[test]
 #[file_serial]
 fn test_io_wait_wakes_task() {
@@ -31,11 +34,4 @@ fn test_io_wait_wakes_task() {
         order
     });
     assert_eq!(order, vec![1]);
-}
-
-#[cfg(feature = "async-io")]
-#[test]
-#[file_serial]
-fn test_io_wait_wakes_task_async() {
-    test_io_wait_wakes_task();
 }
