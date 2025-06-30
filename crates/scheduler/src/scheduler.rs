@@ -12,6 +12,7 @@ use mio::{Events, Interest, Poll, Token, unix::SourceFd};
 use crate::clock::TickClock;
 #[cfg(feature = "async-io")]
 use crate::io::IoSource;
+use crate::ready_queue::ReadyEntry;
 use crate::ready_queue::ReadyQueue;
 use crate::syscall::SystemCall;
 use crate::task::{Task, TaskContext, TaskId};
@@ -21,6 +22,7 @@ use crate::wait_map::WaitMap;
 /// and join waiters.
 pub struct Scheduler {
     next_id: TaskId,
+    seq: u64,
     syscall_tx: Sender<(TaskId, SystemCall)>,
     syscall_rx: Receiver<(TaskId, SystemCall)>,
     #[cfg(not(feature = "async-io"))]
@@ -52,6 +54,7 @@ impl Scheduler {
         let poll = Poll::new().expect("poll");
         Self {
             next_id: 1,
+            seq: 0,
             syscall_tx,
             syscall_rx,
             #[cfg(not(feature = "async-io"))]
@@ -105,13 +108,13 @@ impl Scheduler {
         self.ready.is_empty()
     }
 
-    /// Spawn a new coroutine task with a TaskContext.
+    /// Spawn a new coroutine task with a specific priority.
     ///
     /// # Safety
     /// This function uses `may::coroutine::spawn`, which is unsafe because it may break Rust's safety guarantees
     /// if the spawned coroutine accesses data that is not properly synchronized or outlives its stack frame.
     /// The caller must ensure that the closure and its captured data are safe to use in this context.
-    pub unsafe fn spawn<F>(&mut self, f: F) -> TaskId
+    pub unsafe fn spawn_with_priority<F>(&mut self, pri: u8, f: F) -> TaskId
     where
         F: FnOnce(TaskContext) + Send + 'static,
     {
@@ -125,9 +128,28 @@ impl Scheduler {
 
         let handle: JoinHandle<()> = unsafe { may::coroutine::spawn(move || f(ctx)) };
 
-        self.tasks.insert(tid, Task { tid, handle });
-        self.ready.push(tid);
+        self.tasks.insert(tid, Task { tid, pri, handle });
+        let entry = ReadyEntry {
+            pri,
+            seq: self.seq,
+            tid,
+        };
+        self.seq += 1;
+        self.ready.push(entry);
         tid
+    }
+
+    /// Spawn a new coroutine task with default priority (10).
+    ///
+    /// # Safety
+    /// This function uses `may::coroutine::spawn`, which is unsafe because it may break Rust's safety guarantees
+    /// if the spawned coroutine accesses data that is not properly synchronized or outlives its stack frame.
+    /// The caller must ensure that the closure and its captured data are safe to use in this context.
+    pub unsafe fn spawn<F>(&mut self, f: F) -> TaskId
+    where
+        F: FnOnce(TaskContext) + Send + 'static,
+    {
+        unsafe { self.spawn_with_priority(10, f) }
     }
 
     /// Run the scheduler loop, processing system calls from tasks.
@@ -138,7 +160,7 @@ impl Scheduler {
             while let Some(&Reverse((wake_at, tid))) = self.sleepers.peek() {
                 if wake_at <= self.clock.now() {
                     self.sleepers.pop();
-                    self.ready.push(tid);
+                    self.push_ready(tid);
                 } else {
                     break;
                 }
@@ -148,7 +170,7 @@ impl Scheduler {
                 if wake_at <= self.clock.now() {
                     self.timeout_waiters.pop();
                     if self.wait_map.remove_waiter(target, waiter) {
-                        self.ready.push(waiter);
+                        self.push_ready(waiter);
                     }
                 } else {
                     break;
@@ -159,7 +181,7 @@ impl Scheduler {
                 if wake_at <= self.clock.now() {
                     self.timeout_waiters.pop();
                     if self.wait_map.remove_waiter(target, waiter) {
-                        self.ready.push(waiter);
+                        self.push_ready(waiter);
                     }
                 } else {
                     break;
@@ -172,7 +194,7 @@ impl Scheduler {
 
             while let Ok(io_id) = self.io_rx.try_recv() {
                 for tid in self.wait_map.complete_io(io_id) {
-                    self.ready.push(tid);
+                    self.push_ready(tid);
                 }
             }
 
@@ -189,7 +211,7 @@ impl Scheduler {
                     match self.io_rx.recv_timeout(Duration::from_secs(5)) {
                         Ok(io_id) => {
                             for tid in self.wait_map.complete_io(io_id) {
-                                self.ready.push(tid);
+                                self.push_ready(tid);
                             }
                             continue;
                         }
@@ -207,7 +229,7 @@ impl Scheduler {
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
                 Ok((call_tid, syscall)) => {
                     if call_tid != tid && self.tasks.contains_key(&tid) {
-                        self.ready.push(tid);
+                        self.push_ready(tid);
                     }
                     self.handle_syscall(call_tid, syscall, &mut done_order);
                 }
@@ -262,7 +284,7 @@ impl Scheduler {
             for ev in events.iter() {
                 if let Some(src) = self.sources.get(&ev.token()) {
                     for tid in self.wait_map.complete_io(src.id()) {
-                        self.ready.push(tid);
+                        self.push_ready(tid);
                     }
                 }
             }
@@ -271,7 +293,7 @@ impl Scheduler {
             while let Some(&Reverse((wake_at, tid))) = self.sleepers.peek() {
                 if wake_at <= self.clock.now() {
                     self.sleepers.pop();
-                    self.ready.push(tid);
+                    self.push_ready(tid);
                 } else {
                     break;
                 }
@@ -295,7 +317,7 @@ impl Scheduler {
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
                 Ok((call_tid, syscall)) => {
                     if call_tid != tid && self.tasks.contains_key(&tid) {
-                        self.ready.push(tid);
+                        self.push_ready(tid);
                     }
                     self.handle_syscall(call_tid, syscall, &mut done_order);
                 }
@@ -345,7 +367,25 @@ impl Default for Scheduler {
 impl Scheduler {
     /// Directly push a task ID into the ready queue without deduplication.
     pub fn ready_push_duplicate_for_test(&mut self, tid: TaskId) {
-        self.ready.force_push(tid);
+        let pri = self.tasks.get(&tid).map(|t| t.pri).unwrap_or(10);
+        self.ready.force_push(ReadyEntry {
+            pri,
+            seq: self.seq,
+            tid,
+        });
+        self.seq += 1;
+    }
+
+    fn push_ready(&mut self, tid: TaskId) {
+        if let Some(task) = self.tasks.get(&tid) {
+            let entry = ReadyEntry {
+                pri: task.pri,
+                seq: self.seq,
+                tid,
+            };
+            self.seq += 1;
+            self.ready.push(entry);
+        }
     }
 
     fn next_wake_instant(&self) -> Option<Instant> {
@@ -378,7 +418,7 @@ impl Scheduler {
                     task.handle.join().expect("task join failed");
                 }
                 for waiter in self.wait_map.complete(tid) {
-                    self.ready.push(waiter);
+                    self.push_ready(waiter);
                 }
                 done.push(tid);
                 requeue = false;
@@ -402,7 +442,7 @@ impl Scheduler {
                     unsafe { task.handle.coroutine().cancel() };
                     let _ = task.handle.join();
                     for waiter in self.wait_map.complete(target) {
-                        self.ready.push(waiter);
+                        self.push_ready(waiter);
                     }
                     self.cancelled.insert(target);
                     done.push(target);
@@ -417,7 +457,7 @@ impl Scheduler {
             }
         }
         if requeue && self.tasks.contains_key(&tid) {
-            self.ready.push(tid);
+            self.push_ready(tid);
         }
     }
 }

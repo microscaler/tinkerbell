@@ -6,7 +6,11 @@ pub type TaskId = u64;
 
 /// A wrapper around a running coroutine and its metadata.
 pub struct Task {
+    /// Unique identifier for the task.
     pub tid: TaskId,
+    /// Scheduling priority (0 = highest).
+    pub pri: u8,
+    /// Coroutine handle backing the task.
     pub handle: may::coroutine::JoinHandle<()>,
 }
 
