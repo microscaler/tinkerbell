@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 
 use crate::task::TaskId;
 
@@ -6,6 +6,7 @@ use crate::task::TaskId;
 #[derive(Default)]
 pub struct ReadyQueue {
     queue: VecDeque<TaskId>,
+    set: HashSet<TaskId>,
 }
 
 impl ReadyQueue {
@@ -13,22 +14,30 @@ impl ReadyQueue {
     pub fn new() -> Self {
         Self {
             queue: VecDeque::new(),
+            set: HashSet::new(),
         }
     }
 
     /// Push a task ID onto the queue.
     pub fn push(&mut self, tid: TaskId) {
-        self.queue.push_back(tid);
+        if self.set.insert(tid) {
+            self.queue.push_back(tid);
+        }
     }
 
     /// Returns `true` if the queue already contains `tid`.
     pub fn contains(&self, tid: TaskId) -> bool {
-        self.queue.contains(&tid)
+        self.set.contains(&tid)
     }
 
     /// Pop the next task ID from the queue.
     pub fn pop(&mut self) -> Option<TaskId> {
-        self.queue.pop_front()
+        if let Some(tid) = self.queue.pop_front() {
+            self.set.remove(&tid);
+            Some(tid)
+        } else {
+            None
+        }
     }
 
     /// Returns `true` if the queue has no tasks.
@@ -39,5 +48,12 @@ impl ReadyQueue {
     /// Returns the number of tasks in the queue.
     pub fn len(&self) -> usize {
         self.queue.len()
+    }
+}
+
+impl ReadyQueue {
+    /// Push a task ID without checking for duplicates. Used only for tests.
+    pub fn force_push(&mut self, tid: TaskId) {
+        self.queue.push_back(tid);
     }
 }

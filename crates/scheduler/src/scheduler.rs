@@ -74,9 +74,7 @@ impl Scheduler {
         let handle: JoinHandle<()> = unsafe { may::coroutine::spawn(move || f(ctx)) };
 
         self.tasks.insert(tid, Task { tid, handle });
-        if !self.ready.contains(tid) {
-            self.ready.push(tid);
-        }
+        self.ready.push(tid);
         tid
     }
 
@@ -87,9 +85,7 @@ impl Scheduler {
             // process any pending I/O completions
             while let Ok(io_id) = self.io_rx.try_recv() {
                 for tid in self.wait_map.complete_io(io_id) {
-                    if !self.ready.contains(tid) {
-                        self.ready.push(tid);
-                    }
+                    self.ready.push(tid);
                 }
             }
 
@@ -98,9 +94,7 @@ impl Scheduler {
                 None => match self.io_rx.recv_timeout(Duration::from_secs(5)) {
                     Ok(io_id) => {
                         for tid in self.wait_map.complete_io(io_id) {
-                            if !self.ready.contains(tid) {
-                                self.ready.push(tid);
-                            }
+                            self.ready.push(tid);
                         }
                         continue;
                     }
@@ -117,8 +111,7 @@ impl Scheduler {
 
             match self.syscall_rx.recv_timeout(Duration::from_secs(5)) {
                 Ok((call_tid, syscall)) => {
-                    if call_tid != tid && self.tasks.contains_key(&tid) && !self.ready.contains(tid)
-                    {
+                    if call_tid != tid && self.tasks.contains_key(&tid) {
                         self.ready.push(tid);
                     }
                     let tid = call_tid;
@@ -135,9 +128,7 @@ impl Scheduler {
                                 task.handle.join().expect("task join failed");
                             }
                             for waiter in self.wait_map.complete(tid) {
-                                if !self.ready.contains(waiter) {
-                                    self.ready.push(waiter);
-                                }
+                                self.ready.push(waiter);
                             }
                             done_order.push(tid);
                             requeue = false;
@@ -153,7 +144,7 @@ impl Scheduler {
                             requeue = false;
                         }
                     }
-                    if requeue && self.tasks.contains_key(&tid) && !self.ready.contains(tid) {
+                    if requeue && self.tasks.contains_key(&tid) {
                         self.ready.push(tid);
                     }
                 }
@@ -177,6 +168,6 @@ impl Default for Scheduler {
 impl Scheduler {
     /// Directly push a task ID into the ready queue without deduplication.
     pub fn ready_push_duplicate_for_test(&mut self, tid: TaskId) {
-        self.ready.push(tid);
+        self.ready.force_push(tid);
     }
 }
