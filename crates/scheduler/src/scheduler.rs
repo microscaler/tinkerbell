@@ -8,6 +8,8 @@ use crate::syscall::SystemCall;
 use crate::task::{Task, TaskContext, TaskId};
 use crate::wait_map::WaitMap;
 
+/// Core runtime orchestrator managing runnable tasks, pending I/O events,
+/// and join waiters.
 pub struct Scheduler {
     next_id: TaskId,
     syscall_tx: Sender<(TaskId, SystemCall)>,
