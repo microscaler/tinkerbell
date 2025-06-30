@@ -1,68 +1,20 @@
-Below are **three new Codex-ready task files** (markdown) that drive the next milestones:
-
----
-
-
----
+Below is a **Phase 3 task bundle** that will bring the scheduler up to full **PyOS8-level I/O parity**.
+Copy each markdown file into `tasks/scheduler/…` so Codex (or any contributor) can implement them in order.
 
 
 
----
 
-### `tasks/scheduler/io_poll.md`  *(feature-gated)*
 
-```md
-# 🔌 Task: Wire `SystemCall::IoWait` to Event Polling (MIO)
+### 🔖 How to Use
 
-## Context
-Real agent tasks will block on sockets/FIFOs. Replace manual `io_tx` with MIO
-(poll/epoll/kqueue) under `cfg(feature = "async-io")`.
+1. Drop each file under `tasks/scheduler/`.
+2. Triage them in PR order:
 
-## Acceptance
-* With  `--features async-io`, tests use `mio::Poll` for readiness.
-* Existing behaviour via in-memory channel retained when feature disabled.
+  
+  2. `io_event_loop`
+  3. `cancel_timeout`
+  4. `priority_queue`
+  5. `panic_isolation`
+3. Run `cargo nextest` with and without `--features async-io` for full coverage.
 
----
-
-## Steps
-
-- [ ] **Add `mio` dependency (optional)**
-
-  ```toml
-  mio = { version = "0.8", optional = true }
-````
-
-* [ ] **`Scheduler` conditional field**
-
-  ```rust
-  #[cfg(feature = "async-io")]
-  poll: mio::Poll,
-  ```
-
-* [ ] **Map `IoWait(io_id)` to registration**
-
-  *Hint:* store `io_id -> Token` mapping, register FD, push to `wait_map`.
-
-* [ ] **Poll when ready queue empty**
-
-  ```rust
-  let events = poll.poll(&mut events, timeout)?;
-  for ev in events { complete_io(ev.token().into()); }
-  ```
-
-* [ ] **Feature flag guards**
-
-  Provide stub impl (current channel path) when feature is off.
-
-* [ ] **Add doc-test** demonstrating compile with:
-
-  ```bash
-  cargo test -p scheduler --features async-io
-  ```
-
-```
-
----
-
-These three files should be placed in `tasks/scheduler/` to drive Codex or any contributor through the next scheduler milestones.
-```
+With these implemented Tiffany’s scheduler will match (and exceed) PyOS8’s capabilities in cooperative stepping, virtual time, real I/O readiness, cancellation, and priority handling.

@@ -60,6 +60,16 @@ Complete the MVP coroutine task scheduler by:
   - [ ] look at `./virtual_clock.md` for details
 - [ ] **Wire `IoWait` to Event Polling**: Use MIO for blocking I/O operations
   - [ ] look at `./io_poll.md` for details
+- [ ] **Implement `io_registry_trait` look at `./io_registry_trait.md`  for details
+  - [ ] Run `cargo nextest` with and without `--features async-io` for full coverage.
+- [ ] **Implement `io_event_loop` and  look at `./io_event_loop.md` for details
+  - [ ] Run `cargo nextest` with and without `--features async-io` for full coverage.
+- [ ] **Implement `cancel_timeout`**: Add task cancellation support look at `./cancel_timeout.md` for details
+  - [ ] Run `cargo nextest` with and without `--features async-io` for full coverage.
+- [ ] **Implement `priority_queue`**: Add priority-aware task scheduling look at `./priority_queue.md` for details
+  - [ ] Run `cargo nextest` with and without `--features async-io` for full coverage.
+- [ ] **Implement `panic_isolation`**: Ensure task panics do not crash the scheduler look at `./panic_isolation.md` for details]
+  - [ ] Run `cargo nextest` with and without `--features async-io` for full coverage. 
 
 
 ## Crate Types
