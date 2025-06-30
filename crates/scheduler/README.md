@@ -51,6 +51,26 @@ yield SystemCall::Sleep(Duration::from_secs(1));
 
 The task is then moved to a timed wait queue, and resumed later by the scheduler.
 
+Tasks automatically yield back to the scheduler after each call to `TaskContext::syscall`,
+ensuring cooperative execution across all running tasks.
+
+---
+
+### Scheduler Loop
+
+`Scheduler::run` processes events in a fixed order each iteration:
+
+1. **Drain system calls** – all pending `SystemCall`s are handled first. This may
+   wake tasks waiting on joins or I/O and records any completed tasks.
+2. **Apply I/O completions** – any ready I/O events are drained and their waiting
+   tasks queued.
+3. **Pull next task** – a task ID is popped from the ready queue. If the queue is
+   empty the scheduler waits up to five seconds for an I/O event before
+   returning.
+
+This guarantees that tasks unblocked by system calls resume promptly before the
+next ready task is polled.
+
 ---
 
 ### Scheduler Loop

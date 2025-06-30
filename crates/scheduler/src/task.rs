@@ -1,5 +1,6 @@
 use crate::syscall::SystemCall;
 use crossbeam::channel::Sender;
+use may::coroutine::yield_now;
 
 /// Unique identifier for a task.
 pub type TaskId = u64;
@@ -25,9 +26,7 @@ impl TaskContext {
         self.syscall_tx
             .send((self.tid, call))
             .expect("Failed to send system call");
-        // Yield after sending the syscall so the scheduler can handle it
-        // promptly. `may::coroutine::yield_now` already falls back to
-        // `std::thread::yield_now` when not in a coroutine context.
-        may::coroutine::yield_now();
+        // yield back to the scheduler after issuing a syscall
+        yield_now();
     }
 }
