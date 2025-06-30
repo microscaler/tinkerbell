@@ -14,6 +14,7 @@ mio = { version = "0.8", optional = true, features = ["os-poll", "os-ext"] }
 traced-test = "0.1"
 insta = { version = "1.30", features = ["yaml"] }
 serial_test = { version = "2.0", features = ["file_locks"] }
+nix = { version = "0.27", default-features = false }
 
 [features]
 default = []

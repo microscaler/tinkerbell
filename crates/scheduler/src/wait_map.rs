@@ -6,7 +6,7 @@ use crate::task::TaskId;
 #[derive(Default)]
 pub struct WaitMap {
     join_waiters: HashMap<TaskId, Vec<TaskId>>, // target -> waiting tasks
-    io_waiters: HashMap<u64, Vec<TaskId>>,      // io_id -> waiting tasks
+    io_waiters: HashMap<u64, Vec<TaskId>>,      // source_id -> waiting tasks
 }
 
 impl WaitMap {
@@ -28,13 +28,13 @@ impl WaitMap {
         self.join_waiters.remove(&target).unwrap_or_default()
     }
 
-    /// Record that `waiter` is waiting for the I/O resource `io_id`.
-    pub fn wait_io(&mut self, io_id: u64, waiter: TaskId) {
-        self.io_waiters.entry(io_id).or_default().push(waiter);
+    /// Record that `waiter` is waiting for the I/O resource `source_id`.
+    pub fn wait_io(&mut self, source_id: u64, waiter: TaskId) {
+        self.io_waiters.entry(source_id).or_default().push(waiter);
     }
 
     /// Notify tasks waiting on an I/O resource.
-    pub fn complete_io(&mut self, io_id: u64) -> Vec<TaskId> {
-        self.io_waiters.remove(&io_id).unwrap_or_default()
+    pub fn complete_io(&mut self, source_id: u64) -> Vec<TaskId> {
+        self.io_waiters.remove(&source_id).unwrap_or_default()
     }
 }

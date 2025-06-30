@@ -7,9 +7,11 @@ use std::thread::{Scope, ScopedJoinHandle};
 use std::time::{Duration, Instant};
 
 #[cfg(feature = "async-io")]
-use mio::{Events, Poll, Token, Waker};
+use mio::{Events, Interest, Poll, Token, Waker, unix::SourceFd};
 
 use crate::clock::TickClock;
+#[cfg(feature = "async-io")]
+use crate::io::IoSource;
 use crate::ready_queue::ReadyQueue;
 use crate::syscall::SystemCall;
 use crate::task::{Task, TaskContext, TaskId};
@@ -29,6 +31,8 @@ pub struct Scheduler {
     io_tokens: HashMap<u64, Token>,
     #[cfg(feature = "async-io")]
     io_wakers: HashMap<u64, Waker>,
+    #[cfg(feature = "async-io")]
+    sources: HashMap<u64, Arc<dyn IoSource>>,
     clock: TickClock,
     sleepers: BinaryHeap<Reverse<(Instant, TaskId)>>,
     tasks: HashMap<TaskId, Task>,
@@ -55,6 +59,8 @@ impl Scheduler {
             io_tokens: HashMap::new(),
             #[cfg(feature = "async-io")]
             io_wakers: HashMap::new(),
+            #[cfg(feature = "async-io")]
+            sources: HashMap::new(),
             clock: TickClock::new(Instant::now()),
             sleepers: BinaryHeap::new(),
             tasks: HashMap::new(),
@@ -66,6 +72,21 @@ impl Scheduler {
     /// Return a handle that can be used to signal I/O readiness.
     pub fn io_handle(&self) -> Sender<u64> {
         self.io_tx.clone()
+    }
+
+    /// Register a new I/O source with the scheduler.
+    #[cfg(feature = "async-io")]
+    pub fn register_io(&mut self, src: Arc<dyn IoSource>) {
+        let id = src.id();
+        let token = Token(self.io_tokens.len() + 1);
+        let fd = src.raw_fd();
+        let mut source = SourceFd(&fd);
+        self.poll
+            .registry()
+            .register(&mut source, token, Interest::READABLE)
+            .expect("register io source");
+        self.sources.insert(id, src);
+        self.io_tokens.insert(id, token);
     }
 
     /// Return the number of tasks currently in the ready queue.
