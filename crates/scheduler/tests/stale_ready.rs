@@ -1,4 +1,5 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
+use serial_test::file_serial;
 use std::sync::{Arc, Barrier};
 use std::thread;
 
