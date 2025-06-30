@@ -201,6 +201,9 @@ impl Scheduler {
                 self.wait_map.wait_io(io_id, tid);
                 requeue = false;
             }
+            SystemCall::Yield => {
+                // Cooperative yield: no action required other than requeueing
+            }
         }
         if requeue && self.tasks.contains_key(&tid) {
             self.ready.push(tid);

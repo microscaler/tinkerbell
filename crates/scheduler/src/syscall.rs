@@ -18,4 +18,7 @@ pub enum SystemCall {
 
     /// Block until the given I/O resource is ready
     IoWait(u64),
+
+    /// Cooperatively yield control back to the scheduler
+    Yield,
 }

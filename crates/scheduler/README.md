@@ -27,7 +27,7 @@ The scheduler should:
 |-----------------|---------------------------------------------------------------|
 | `Task`          | A generator-style coroutine that can yield system calls       |
 | `Scheduler`     | Manages task queue, blocking map, and the main loop           |
-| `SystemCall`    | An abstract yield, e.g., `Sleep`, `Spawn`, `Join`, `Log` |
+| `SystemCall`    | An abstract yield, e.g., `Sleep`, `Spawn`, `Join`, `Log`, `Yield` |
 | `ReadyQueue`    | FIFO queue of runnable tasks built on `VecDeque<TaskId>` |
 | `CallStack`     | LIFO per-task stack for nested coroutine trampolining |
 | `WaitMap`       | Tracks join/wait conditions for resumption |
@@ -52,7 +52,9 @@ yield SystemCall::Sleep(Duration::from_secs(1));
 The task is then moved to a timed wait queue, and resumed later by the scheduler.
 
 Tasks automatically yield back to the scheduler after each call to `TaskContext::syscall`,
-ensuring cooperative execution across all running tasks.
+ensuring cooperative execution across all running tasks. When a task simply
+wants to give up the CPU without performing a specific syscall it can call
+`TaskContext::yield_now()`, which requeues the task behind others.
 
 ---
 
