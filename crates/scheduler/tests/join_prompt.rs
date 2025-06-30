@@ -11,18 +11,18 @@ fn join_wake_before_next_ready() {
     thread::scope(|s| {
         let handle = unsafe { sched.start(s, barrier.clone()) };
 
-        let child = unsafe {
-            sched.spawn(|ctx: TaskContext| {
-                ctx.syscall(SystemCall::Done);
-            })
-        };
+    let parent = unsafe {
+        sched.spawn(move |ctx: TaskContext| {
+            ctx.syscall(SystemCall::Join(child));
+            ctx.syscall(SystemCall::Done);
+        })
+    };
 
-        let parent = unsafe {
-            sched.spawn(move |ctx: TaskContext| {
-                ctx.syscall(SystemCall::Join(child));
-                ctx.syscall(SystemCall::Done);
-            })
-        };
+    let _third = unsafe {
+        sched.spawn(|ctx: TaskContext| {
+            ctx.syscall(SystemCall::Done);
+        })
+    };
 
         let _third = unsafe {
             sched.spawn(|ctx: TaskContext| {
