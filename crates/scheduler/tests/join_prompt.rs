@@ -1,8 +1,10 @@
 use scheduler::{Scheduler, SystemCall, task::TaskContext};
+use serial_test::serial;
 use std::sync::{Arc, Barrier};
 use std::thread;
 
 #[test]
+#[serial]
 fn join_wake_before_next_ready() {
     let mut sched = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));
