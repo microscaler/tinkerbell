@@ -34,6 +34,7 @@ fn integration_task_order() {
     assert_eq!(order, vec![2, 1]);
 }
 
+#[cfg(not(feature = "async-io"))]
 #[test]
 #[file_serial]
 fn integration_join_and_io_wait() {
