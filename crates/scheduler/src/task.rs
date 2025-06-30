@@ -1,5 +1,6 @@
 use crate::syscall::SystemCall;
 use crossbeam::channel::Sender;
+use may::coroutine::yield_now;
 
 /// Unique identifier for a task.
 pub type TaskId = u64;

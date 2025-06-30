@@ -4,6 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 #[test]
+#[file_serial]
 fn test_io_wait_wakes_task() {
     let mut sched = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));

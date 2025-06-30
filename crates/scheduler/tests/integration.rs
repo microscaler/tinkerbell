@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 
 #[test]
-#[serial]
+#[file_serial]
 fn integration_task_order() {
     let mut sched = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));
@@ -35,7 +35,7 @@ fn integration_task_order() {
 }
 
 #[test]
-#[serial]
+#[file_serial]
 fn integration_join_and_io_wait() {
     let mut sched = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));
