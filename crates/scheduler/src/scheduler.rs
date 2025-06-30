@@ -1,10 +1,12 @@
 use crossbeam::channel::{Receiver, RecvTimeoutError, Sender, unbounded};
 use may::coroutine::JoinHandle;
-use std::collections::HashMap;
+use std::cmp::Reverse;
+use std::collections::{BinaryHeap, HashMap};
 use std::sync::{Arc, Barrier};
 use std::thread::{Scope, ScopedJoinHandle};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
+use crate::clock::TickClock;
 use crate::ready_queue::ReadyQueue;
 use crate::syscall::SystemCall;
 use crate::task::{Task, TaskContext, TaskId};
@@ -18,6 +20,8 @@ pub struct Scheduler {
     syscall_rx: Receiver<(TaskId, SystemCall)>,
     io_tx: Sender<u64>,
     io_rx: Receiver<u64>,
+    clock: TickClock,
+    sleepers: BinaryHeap<Reverse<(Instant, TaskId)>>,
     tasks: HashMap<TaskId, Task>,
     ready: ReadyQueue,
     wait_map: WaitMap,
@@ -34,6 +38,8 @@ impl Scheduler {
             syscall_rx,
             io_tx,
             io_rx,
+            clock: TickClock::new(Instant::now()),
+            sleepers: BinaryHeap::new(),
             tasks: HashMap::new(),
             ready: ReadyQueue::new(),
             wait_map: WaitMap::new(),
@@ -84,6 +90,14 @@ impl Scheduler {
     pub fn run(&mut self) -> Vec<TaskId> {
         let mut done_order = Vec::new();
         while !self.tasks.is_empty() {
+            while let Some(&Reverse((wake_at, tid))) = self.sleepers.peek() {
+                if wake_at <= self.clock.now() {
+                    self.sleepers.pop();
+                    self.ready.push(tid);
+                } else {
+                    break;
+                }
+            }
             // handle all pending system calls first
             while let Ok((call_tid, syscall)) = self.syscall_rx.try_recv() {
                 self.handle_syscall(call_tid, syscall, &mut done_order);
@@ -98,15 +112,24 @@ impl Scheduler {
 
             let tid = match self.ready.pop() {
                 Some(id) => id,
-                None => match self.io_rx.recv_timeout(Duration::from_secs(5)) {
-                    Ok(io_id) => {
-                        for tid in self.wait_map.complete_io(io_id) {
-                            self.ready.push(tid);
+                None => {
+                    if let Some(&Reverse((wake_at, _))) = self.sleepers.peek() {
+                        if wake_at > self.clock.now() {
+                            let diff = wake_at.duration_since(self.clock.now());
+                            self.clock.tick(diff);
                         }
                         continue;
                     }
-                    Err(_) => break,
-                },
+                    match self.io_rx.recv_timeout(Duration::from_secs(5)) {
+                        Ok(io_id) => {
+                            for tid in self.wait_map.complete_io(io_id) {
+                                self.ready.push(tid);
+                            }
+                            continue;
+                        }
+                        Err(_) => break,
+                    }
+                }
             };
 
             if !self.tasks.contains_key(&tid) {
@@ -178,7 +201,9 @@ impl Scheduler {
             SystemCall::Log(msg) => tracing::info!(task = %tid, "{}", msg),
             SystemCall::Sleep(dur) => {
                 tracing::info!(task = %tid, "sleeping {:?}", dur);
-                std::thread::sleep(dur);
+                let wake_at = self.clock.now() + dur;
+                self.sleepers.push(Reverse((wake_at, tid)));
+                requeue = false;
             }
             SystemCall::Done => {
                 tracing::info!(task = %tid, "task done");
