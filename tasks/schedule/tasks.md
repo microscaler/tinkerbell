@@ -50,8 +50,8 @@ Complete the MVP coroutine task scheduler by:
 - [x] Add `IoWait` syscall and resume logic using a signal channel
 
 ## Critical Task Dependencies
-- [ ] **Fix Stale Ready IDs**: Ensure the scheduler ignores stale task IDs in the ready queue
-  - [ ] look at `./fix-stale-ready-ids.md` for details
+- [x] **Fix Stale Ready IDs**: Ensure the scheduler ignores stale task IDs in the ready queue
+  - [x] look at `./fix-stale-ready-ids.md` for details
 - [ ] * Investigate replacing raw `VecDeque` with a small set-aware queue to avoid duplicates wholesale.
 - [ ] * Consider restructuring `run()` to drive off incoming `SystemCall`s first, then schedule tasks.
 - [ ] **Implement `yield_now()`**: Introduce cooperative stepping via `TaskContext::yield_now()`

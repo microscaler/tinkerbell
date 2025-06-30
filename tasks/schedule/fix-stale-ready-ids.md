@@ -17,7 +17,7 @@ its `tid` is still in the queue, the lookup panics.
 
 ## Tasks
 
-- [ ] **Guard lookup in `Scheduler::run`**
+- [x] **Guard lookup in `Scheduler::run`**
 
   *File*: `crates/scheduler/src/scheduler.rs`  
   *Locate* the first `_task = self.tasks.get_mut(&tid)…` line (≈ l. 96).  
@@ -30,7 +30,7 @@ its `tid` is still in the queue, the lookup panics.
   }
 ````
 
-* [ ] **(Optional) Deduplicate pushes**
+* [x] **(Optional) Deduplicate pushes**
 
   In every spot that calls `self.ready.push(tid)` add:
 
@@ -43,7 +43,7 @@ its `tid` is still in the queue, the lookup panics.
   > Requires adding a simple `contains(&self, tid: TaskId) -> bool` helper to
   > `ReadyQueue`.
 
-* [ ] **Add regression test**
+* [x] **Add regression test**
 
   *File*: `crates/scheduler/tests/stale_ready.rs`
 
@@ -76,13 +76,13 @@ its `tid` is still in the queue, the lookup panics.
   }
   ```
 
-* [ ] **Run full test suite**
+* [x] **Run full test suite**
 
   ```bash
   cargo nextest run --workspace
   ```
 
-* [ ] **Commit**
+* [x] **Commit**
 
   ```
   feat(scheduler): guard against stale task-ids in ReadyQueue
