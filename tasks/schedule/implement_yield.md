@@ -20,13 +20,13 @@ We will mirror this by adding `TaskContext::yield_now()` and making
 
 ## Steps
 
-- [ ] **Extend `SystemCall`**
+- [x] **Extend `SystemCall`**
 
   ```rust
   SystemCall::Yield,
 ````
 
-* [ ] **Add helper on `TaskContext`**
+* [x] **Add helper on `TaskContext`**
 
   ```rust
   impl TaskContext {
@@ -36,17 +36,17 @@ We will mirror this by adding `TaskContext::yield_now()` and making
   }
   ```
 
-* [ ] **Handle `Yield` in `Scheduler::run`**
+* [x] **Handle `Yield` in `Scheduler::run`**
 
   ```rust
   SystemCall::Yield => { /* no-op except requeue */ }
   ```
 
-* [ ] **Re-queue immediately without sleep**
+* [x] **Re-queue immediately without sleep**
 
   Ensure `requeue = true` for `Yield`.
 
-* [ ] **Add regression test**
+* [x] **Add regression test**
 
   `crates/scheduler/tests/yield.rs`
 
