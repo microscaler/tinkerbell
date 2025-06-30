@@ -13,7 +13,7 @@ The scheduler should:
 - Support creating and running **multiple tasks** concurrently
 - Support yielding, blocking, and resuming tasks cooperatively
 - Manage tasks via:
-  - FIFO ready queue
+  - Priority-based ready queue
   - Per-task LIFO call stack (for nested coroutines)
 - Support blocking system calls like `Sleep`, `WaitTask`, `ReadWait`
 - Be fully testable via deterministic simulations
@@ -28,7 +28,7 @@ The scheduler should:
 | `Task`          | A generator-style coroutine that can yield system calls       |
 | `Scheduler`     | Manages task queue, blocking map, and the main loop           |
 | `SystemCall`    | An abstract yield, e.g., `Sleep`, `Spawn`, `Join`, `Log`, `Yield` |
-| `ReadyQueue`    | FIFO queue of runnable tasks built on `VecDeque<TaskId>` |
+| `ReadyQueue`    | Priority queue of runnable tasks built on `BinaryHeap<ReadyEntry>` |
 | `CallStack`     | LIFO per-task stack for nested coroutine trampolining |
 | `WaitMap`       | Tracks join/wait conditions for resumption |
 | `ready_len()`   | Inspect number of tasks currently queued |
@@ -42,6 +42,12 @@ let mut sched = Scheduler::new();
 let tid = sched.spawn(echo_loop());
 sched.run();
 ````
+
+Higher priority tasks can be spawned with `spawn_with_priority`:
+
+```rust
+let tid = unsafe { sched.spawn_with_priority(5, my_task) };
+```
 
 Inside `echo_loop`, you might yield:
 

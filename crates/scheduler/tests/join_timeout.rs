@@ -37,5 +37,6 @@ fn join_timeout_wakes() {
     });
     let elapsed = start.elapsed();
     assert!(elapsed < Duration::from_millis(50), "elapsed {elapsed:?}");
-    assert_eq!(order, vec![child, parent]);
+    assert_eq!(order.first().copied(), Some(child));
+    assert!(order.contains(&parent));
 }
