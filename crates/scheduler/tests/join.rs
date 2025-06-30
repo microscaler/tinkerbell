@@ -7,18 +7,23 @@ use std::thread;
 #[serial]
 fn test_join_wakes_waiter() {
     let mut sched = Scheduler::new();
-    let barrier = Arc::new(Barrier::new(2));
+    // main thread + scheduler thread + two tasks
+    let barrier = Arc::new(Barrier::new(4));
     let (child, parent, order) = thread::scope(|s| {
         let handle = unsafe { sched.start(s, barrier.clone()) };
 
+        let b = barrier.clone();
         let child = unsafe {
-            sched.spawn(|ctx: TaskContext| {
+            sched.spawn(move |ctx: TaskContext| {
+                b.wait();
                 ctx.syscall(SystemCall::Done);
             })
         };
 
+        let b = barrier.clone();
         let parent = unsafe {
             sched.spawn(move |ctx: TaskContext| {
+                b.wait();
                 ctx.syscall(SystemCall::Join(child));
                 ctx.syscall(SystemCall::Done);
             })

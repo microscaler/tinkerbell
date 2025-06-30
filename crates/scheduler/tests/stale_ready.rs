@@ -6,7 +6,7 @@ use std::thread;
 fn stale_ready_id_is_ignored() {
     let mut sched = Scheduler::new();
     let barrier = Arc::new(Barrier::new(2));
-    thread::scope(|s| {
+    let order = thread::scope(|s| {
         let handle = unsafe { sched.start(s, barrier.clone()) };
         let child = unsafe {
             sched.spawn(|ctx: TaskContext| {
@@ -17,5 +17,7 @@ fn stale_ready_id_is_ignored() {
         barrier.wait();
         let order = handle.join().unwrap();
         assert_eq!(order, vec![child]);
+        order
     });
+    assert_eq!(order.len(), 1);
 }

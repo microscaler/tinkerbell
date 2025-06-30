@@ -38,11 +38,10 @@ fn integration_task_order() {
 #[serial]
 fn integration_join_and_io_wait() {
     let mut sched = Scheduler::new();
+    let io_tx = sched.io_handle();
     let barrier = Arc::new(Barrier::new(2));
     let (child, order) = thread::scope(|s| {
         let handle = unsafe { sched.start(s, barrier.clone()) };
-        let io_tx = sched.io_handle();
-
         let child = unsafe {
             sched.spawn(|ctx: TaskContext| {
                 ctx.syscall(SystemCall::Done);
@@ -70,10 +69,6 @@ fn integration_join_and_io_wait() {
 
         barrier.wait();
         let order = handle.join().unwrap();
-        assert_eq!(order.len(), 3);
-        assert!(order.contains(&child));
-        assert!(order.contains(&2));
-        assert!(order.contains(&3));
         (child, order)
     });
     assert_eq!(order.len(), 3);
