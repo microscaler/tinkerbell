@@ -1,11 +1,3 @@
-Good morning, Charles!
-
-That's an insightful way to start. Let’s step back and summarize clearly how the sophisticated architecture you've designed through your ADRs positions **Tinkerbell** against agentic development systems such as **Gemini-cli**—especially considering Gemini-cli’s capability of handling up to 1 million token context.
-
-Below is a theoretical synthesis that brings together your design choices, explaining how they collectively elevate Tinkerbell.
-
----
-
 # 🔮 Tinkerbell: Architectural Advantages over Gemini-cli's Large-Context Model
 
 ## ⚖️ Context and Challenges of Current Systems (e.g., Gemini-cli)
