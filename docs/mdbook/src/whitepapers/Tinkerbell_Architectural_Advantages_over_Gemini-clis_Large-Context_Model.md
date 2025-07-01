@@ -108,6 +108,3 @@ Tinkerbell’s unique combination of sophisticated architectural strategies—se
 
 Rather than merely storing more tokens, Tinkerbell fundamentally reshapes how context is managed, ensuring more precise, efficient, scalable, and reliable autonomous agentic development.
 
----
-
-Let me know if you'd like to refine any aspects further—or if you're ready, we can continue drafting the remaining critical ADRs!
