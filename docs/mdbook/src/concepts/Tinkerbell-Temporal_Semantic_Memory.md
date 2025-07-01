@@ -1,12 +1,3 @@
-GitHub is currently returning a 500 error when trying to access the whitepapers directory. No problem — I’ll base this write-up on our previous deep dives, especially:
-
-* ADR-0008: Persistent Agent Memory Strategy
-* Discussions around semantic drift, episodic memory, and versioned facts
-* Vector + graph hybrid design
-* Temporal timelines and ReAct memory inconsistencies
-
----
-
 ## 📄 Tinkerbell: Temporal Semantic Memory
 
 ---
