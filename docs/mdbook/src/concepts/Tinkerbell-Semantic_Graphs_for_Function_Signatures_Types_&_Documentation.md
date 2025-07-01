@@ -1,8 +1,3 @@
-Absolutely — here is the fully updated and enriched document:
-
----
-
-````markdown
 # 📄 Semantic Graphs for Function Signatures, Types & Documentation
 
 ---
