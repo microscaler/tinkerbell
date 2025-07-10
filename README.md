@@ -1,6 +1,6 @@
 ## 🧚 Tiffany 🧚 An Autonomous Agentic Development Runtime
 
-<img src="docs/images/tiffany.png" alt="Tiffany Logo" width="800"/>
+<p align="center"><img src="docs/images/tiffany.jpeg" alt="Tiffany Logo" width="500"/></p>
 
 **Tiffany** is a next-generation, open-source Autonomous Agentic Development system designed from the ground up for sophisticated, scalable, and intelligent software development. 
 
