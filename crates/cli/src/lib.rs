@@ -7,7 +7,7 @@ use clap::{Parser, Subcommand};
 
 /// Global command line options and subcommands.
 #[derive(Parser, Debug)]
-#[command(name = "ttnyctl")]
+#[command(name = "tctl")]
 pub struct Cli {
     /// Output as JSON
     #[arg(long, global = true)]

@@ -2,7 +2,7 @@
 
 ## Goal
 Integrate the gRPC/REST `api` crate into the daemon so that:
-- The `ttnyctl` CLI can communicate with a running agent
+- The `tctl` CLI can communicate with a running agent
 - Incoming requests are routed to `reasonact`, `canvas`, or task scheduler
 
 ## Tasks
