@@ -1,6 +1,6 @@
-# Tinkerbell Daemon
+# Tiffany Daemon
 
-The `tinkerbell` binary — built from this crate — is the long-running process that powers a Tinkerbell agent inside a container or microVM.
+The `tiffany` binary — built from this crate — is the long-running process that powers a Tiffany agent inside a container or microVM.
 
 It is responsible for:
 
@@ -61,7 +61,7 @@ sequenceDiagram
 ```txt
 crates/daemon/
 ├── bin/
-│   └── tinkerbell.rs         # Binary entrypoint
+│   └── tiffany.rs         # Binary entrypoint
 ├── src/
 │   ├── lib.rs                # Init and shutdown interfaces
 │   ├── config.rs             # Config loader (TOML, JSON, etc.)
@@ -99,7 +99,7 @@ It **does not expose** public APIs; it only manages the agent runtime inside a c
 
 ## 🚀 Goals
 
-The `tinkerbell` daemon is designed to be:
+The `tiffany` daemon is designed to be:
 
 * Deterministic
 * Fast-starting

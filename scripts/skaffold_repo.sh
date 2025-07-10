@@ -2,7 +2,7 @@
 
 set -e
 
-WORKSPACE_NAME="tinkerbell"
+WORKSPACE_NAME="tiffany"
 CRATES=(
   core
   api
@@ -89,7 +89,7 @@ EOF
 echo "Creating example script..."
 cat <<EOF > scripts/start.sh
 #!/bin/bash
-echo "Starting tinkerbell daemon..."
+echo "Starting tiffany daemon..."
 cargo run -p daemon
 EOF
 

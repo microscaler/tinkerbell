@@ -38,7 +38,7 @@ default:
     @echo "Available commands: build, test, run-agent, run-cli"
 
 run-agent:
-    cargo run -p daemon --bin tinkerbell
+    cargo run -p daemon --bin tiffany
 
 run-cli:
     cargo run -p cli --bin tctl -- status

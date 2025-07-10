@@ -1,18 +1,18 @@
-## 🧚 Tinkerbell 🧚 An Autonomous Agentic Development Runtime
+## 🧚 Tiffany 🧚 An Autonomous Agentic Development Runtime
 
-<img src="docs/images/tinkerbell.png" alt="Tinkerbell Logo" width="800"/>
+<img src="docs/images/tiffany.png" alt="Tiffany Logo" width="800"/>
 
-**Tinkerbell** is a next-generation, open-source Autonomous Agentic Development system designed from the ground up for sophisticated, scalable, and intelligent software development. 
+**Tiffany** is a next-generation, open-source Autonomous Agentic Development system designed from the ground up for sophisticated, scalable, and intelligent software development. 
 
-Tinkerbell significantly advances beyond traditional LLM-based agents (such as Gemini-cli or Claude) by leveraging semantic reasoning, structured memory management, and distributed execution. 
+Tiffany significantly advances beyond traditional LLM-based agents (such as Gemini-cli or Claude) by leveraging semantic reasoning, structured memory management, and distributed execution. 
 
 ---
 
-## 🚀 Why Tinkerbell?
+## 🚀 Why Tiffany?
 
-Current agentic systems, despite handling large token contexts, often struggle with scalability, efficiency, accuracy, and maintainability. Tinkerbell addresses these critical limitations through a carefully designed architecture that provides unmatched precision, auditability, and flexibility.
+Current agentic systems, despite handling large token contexts, often struggle with scalability, efficiency, accuracy, and maintainability. Tiffany addresses these critical limitations through a carefully designed architecture that provides unmatched precision, auditability, and flexibility.
 
-Unlike conventional large-context LLM agents, Tinkerbell’s groundbreaking approach includes:
+Unlike conventional large-context LLM agents, Tiffany’s groundbreaking approach includes:
 
 * **Structured Semantic Memory** with explicit versioning and temporal drift management.
 * **Specialized FAR Agent Clusters** for in-depth and context-aware reasoning.
@@ -100,9 +100,9 @@ graph TD
 
 ---
 
-## 🌟 Tinkerbell vs. Traditional Large-Context Systems
+## 🌟 Tiffany vs. Traditional Large-Context Systems
 
-| Capability                   | Gemini-cli (1M context) | 🔥 **Tinkerbell**                                |
+| Capability                   | Gemini-cli (1M context) | 🔥 **Tiffany**                                |
 | ---------------------------- | ----------------------- | ------------------------------------------------ |
 | **Context Management**       | 🔸 Flat token context   | ✅ Semantic graph, structured memory              |
 | **Temporal Drift Handling**  | ❌ None                  | ✅ Explicit temporal versioning                   |
@@ -129,7 +129,7 @@ We offer clear escalation paths and a collaborative community for resolving tech
 
 ## 📅 Release Strategy
 
-Tinkerbell follows strict Semantic Versioning (SemVer), regular release cycles, and structured changelogs:
+Tiffany follows strict Semantic Versioning (SemVer), regular release cycles, and structured changelogs:
 
 * **Stable Releases**: Quarterly, production-ready.
 * **LTS Releases**: 18-month support for security & critical bug fixes.
@@ -139,13 +139,13 @@ Tinkerbell follows strict Semantic Versioning (SemVer), regular release cycles, 
 
 ## 📖 ADRs (Architectural Decision Records)
 
-All Tinkerbell design decisions are transparently documented via comprehensive [ADRs](./docs/adr). This structured approach ensures clarity, informed evolution, and community alignment.
+All Tiffany design decisions are transparently documented via comprehensive [ADRs](./docs/adr). This structured approach ensures clarity, informed evolution, and community alignment.
 
 ---
 
 ## 💻 Getting Started
 
-Check our [Documentation](./docs) to quickly set up your local Tinkerbell environment, start contributing, or explore our ADRs in detail.
+Check our [Documentation](./docs) to quickly set up your local Tiffany environment, start contributing, or explore our ADRs in detail.
 
 ---
 
@@ -160,6 +160,11 @@ Our detailed roadmap outlines future enhancements, such as:
 ---
 
 ## License
+[//]: # (Project Rename)
+
+### Repository Rename
+
+In this release, the project previously known as **Tinkerbell** has been renamed to **Tiffany**. All crates, binaries, and documentation now use the new name.
 
 [MPL-2.0 License][license]
 
@@ -168,5 +173,5 @@ Our detailed roadmap outlines future enhancements, such as:
 
 We warmly welcome engineers, developers, architects, and enthusiasts passionate about autonomous software development, semantic technologies, and next-generation LLMs.
 
-* 📬 **[GitHub Discussions](https://github.com/microscaler/tinkerbell/discussions)**
-* 🚀 **[Open Issues](https://github.com/microscaler/tinkerbell/issues)**
+* 📬 **[GitHub Discussions](https://github.com/microscaler/tiffany/discussions)**
+* 🚀 **[Open Issues](https://github.com/microscaler/tiffany/issues)**

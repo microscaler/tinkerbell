@@ -1,6 +1,6 @@
 ## 🚧 **1. Continuous Long-running Service (Daemon-like)**
 
-Instead of starting and stopping with each CLI invocation (as many tools do), tinkerbell would be a **long-lived daemon**,
+Instead of starting and stopping with each CLI invocation (as many tools do), tiffany would be a **long-lived daemon**,
 preserving conversation memory, state, and cached context between interactions.
 
 * **Key Benefits:**
@@ -18,14 +18,14 @@ preserving conversation memory, state, and cached context between interactions.
 
 ## 🔌 **2. Dual Interaction Interfaces**
 
-tinkerbell would expose two interaction methods:
+tiffany would expose two interaction methods:
 
 ### ✅ **Local Interaction (Filesystem Socket)**
 
 * A Unix Domain Socket for efficient local IPC, ideal for CLI communication.
 
 ```bash
-/tmp/tinkerbell.sock
+/tmp/tiffany.sock
 ```
 
 * **CLI** built with `clap` connects to this socket, forwarding commands and receiving responses.
@@ -37,7 +37,7 @@ use tokio::net::UnixStream;
 use tokio::io::{AsyncWriteExt, AsyncReadExt};
 
 async fn send_cli_request(request: &str) -> anyhow::Result<String> {
-    let mut stream = UnixStream::connect("/tmp/tinkerbell.sock").await?;
+    let mut stream = UnixStream::connect("/tmp/tiffany.sock").await?;
     stream.write_all(request.as_bytes()).await?;
     
     let mut response = String::new();
@@ -69,7 +69,7 @@ async fn agent_request(Json(payload): Json<AgentRequest>) -> Json<AgentResponse>
 
 ## 📚 **3. Persistent State and Memory Management**
 
-tinkerbell’s continuous runtime provides several strategic advantages for memory:
+tiffany’s continuous runtime provides several strategic advantages for memory:
 
 * **In-memory context caching**: quickly resumes sessions.
 * **Periodically persisted state** (on disk, e.g., SQLite or RocksDB) for crash recovery.
@@ -77,7 +77,7 @@ tinkerbell’s continuous runtime provides several strategic advantages for memo
 
 ```mermaid
 graph TD
-    Runtime["tinkerbell Runtime"]
+    Runtime["tiffany Runtime"]
     Runtime --> InMemory["In-memory Context Cache"]
     Runtime --> Persistent["Disk-based State Persistence (SQLite/RocksDB)"]
     Runtime --> Graph["Embedded Graph DB (Neo4j)"]
@@ -92,11 +92,11 @@ Here's a comprehensive architectural representation of your concept:
 ```mermaid
 graph TD
     subgraph Client Interfaces
-        CLI["CLI (Clap-based)"] -->|Unix Socket| Socket["Filesystem Socket (/tmp/tinkerbell.sock)"]
+        CLI["CLI (Clap-based)"] -->|Unix Socket| Socket["Filesystem Socket (/tmp/tiffany.sock)"]
         WebClient["Web UI/IDE Plugin"] -->|REST/gRPC| RemoteAPI["Remote REST/gRPC API"]
     end
     
-    subgraph tinkerbell Runtime [Continuous Daemon]
+    subgraph tiffany Runtime [Continuous Daemon]
         Socket --> AgentCore["Agent Core"]
         RemoteAPI --> AgentCore
         
@@ -119,7 +119,7 @@ graph TD
 
 ## 🛠️ **5. Deployment within Microscaller FAR (Firecracker VMs)**
 
-* Each **Firecracker VM instance** runs one long-lived tinkerbell process, fully sandboxed.
+* Each **Firecracker VM instance** runs one long-lived tiffany process, fully sandboxed.
 * The VM exposes REST/gRPC over a network socket (for secure remote access).
 * The filesystem socket interface is exposed only inside the VM (for local CLI interactions).
 
@@ -182,7 +182,7 @@ With long-lived service design, handling graceful shutdowns, upgrades, and state
 
 ## 🚀 **Conclusion and Next Steps**
 
-Your approach to running **tinkerbell** as a continuously active, memory-persistent daemon with dual interfaces (filesystem socket + REST/gRPC) sets the stage for a robust, flexible, and context-rich system.
+Your approach to running **tiffany** as a continuously active, memory-persistent daemon with dual interfaces (filesystem socket + REST/gRPC) sets the stage for a robust, flexible, and context-rich system.
 
 The immediate actionable steps are:
 

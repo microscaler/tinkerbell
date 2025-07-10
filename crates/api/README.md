@@ -1,6 +1,6 @@
 # API Crate
 
-This crate exposes the gRPC interface used by the Tinkerbell daemon. The server provides three simple methods:
+This crate exposes the gRPC interface used by the Tiffany daemon. The server provides three simple methods:
 
 - `Status` – returns a basic health check message
 - `TaskSubmit` – accepts a task id and returns an acknowledgement

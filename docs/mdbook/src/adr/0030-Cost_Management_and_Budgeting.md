@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-Tinkerbell is designed to run as a horizontally scalable, distributed agentic system. It may operate across:
+Tiffany is designed to run as a horizontally scalable, distributed agentic system. It may operate across:
 
 - On-premises compute nodes (e.g. bare metal blades)
 - Cloud environments (GCP, AWS, Azure)
@@ -45,11 +45,11 @@ Without explicit cost controls, long-lived agents, large memory graphs, and LLM 
 ### 📊 Monitoring and Tooling
 
 - Prometheus metrics exposed per-agent:
-  - `tinkerbell_agent_cpu_seconds_total`
-  - `tinkerbell_agent_mem_bytes`
-  - `tinkerbell_wal_bytes_written_total`
-  - `tinkerbell_vector_index_size_bytes`
-  - `tinkerbell_llm_token_usage_total`
+  - `tiffany_agent_cpu_seconds_total`
+  - `tiffany_agent_mem_bytes`
+  - `tiffany_wal_bytes_written_total`
+  - `tiffany_vector_index_size_bytes`
+  - `tiffany_llm_token_usage_total`
 
 - Central cost dashboard:
   - Displays per-agent and per-namespace cost

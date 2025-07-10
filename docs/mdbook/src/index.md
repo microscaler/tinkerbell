@@ -1,8 +1,8 @@
-# Tinkerbell Agentic Runtime
+# Tiffany Agentic Runtime
 
-Welcome to the Tinkerbell System Design documentation.
+Welcome to the Tiffany System Design documentation.
 
-This book describes the architecture, design decisions (ADRs), diagrams, and execution models that power Tinkerbell — a coroutine-first autonomous agent runtime.
+This book describes the architecture, design decisions (ADRs), diagrams, and execution models that power Tiffany — a coroutine-first autonomous agent runtime.
 
 Explore the chapters in the sidebar or begin with our guiding principles:
 

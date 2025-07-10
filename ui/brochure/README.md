@@ -1,4 +1,4 @@
-# Tinkerbell Brochure UI
+# Tiffany Brochure UI
 
 This UI was bootstrapped with the [Solid](https://solidjs.com/) template for Vite.
 

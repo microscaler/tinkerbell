@@ -1,4 +1,4 @@
-# 🎤 **Tinkerbell: Autonomous Agentic Development**
+# 🎤 **Tiffany: Autonomous Agentic Development**
 
 **Engineering the Future of Intelligent Software**
 
@@ -6,7 +6,7 @@
 
 ## Slide 1: 🚀 **Introduction (2 mins)**
 
-* **What is Tinkerbell?**
+* **What is Tiffany?**
 
     * Autonomous agentic runtime.
     * Semantic, intelligent, scalable software development.
@@ -15,7 +15,7 @@
 
 ---
 
-## Slide 2: ⚙️ **Why Tinkerbell? (3 mins)**
+## Slide 2: ⚙️ **Why Tiffany? (3 mins)**
 
 **Limitations of current agentic systems:**
 
@@ -23,7 +23,7 @@
 * Hard to debug, low transparency, limited auditability.
 * Resource-heavy with limited scalability.
 
-**Tinkerbell’s unique approach:**
+**Tiffany’s unique approach:**
 
 * Semantic reasoning & explicit memory management.
 * Specialized, clustered FAR agents.
@@ -66,7 +66,7 @@ graph TD
 
 ## Slide 5: 🎯 **Key Advantages vs Large-context LLMs (3 mins)**
 
-| Capability          | Gemini-cli (1M token) | 🔥 **Tinkerbell**                        |
+| Capability          | Gemini-cli (1M token) | 🔥 **Tiffany**                        |
 | ------------------- | --------------------- | ---------------------------------------- |
 | Context handling    | 🔸 Flat context       | ✅ Semantic & structured                  |
 | Reasoning precision | 🔸 Moderate           | ✅ High (clusters)                        |
@@ -123,9 +123,9 @@ graph TD
 
 ---
 
-## Slide 10: 🚀 **Join the Tinkerbell Revolution! (3 mins)**
+## Slide 10: 🚀 **Join the Tiffany Revolution! (3 mins)**
 
-* **GitHub:** [github.com/microscaler/tinkerbell](https://github.com/microscaler/tinkerbell)
+* **GitHub:** [github.com/microscaler/tiffany](https://github.com/microscaler/tiffany)
 * **Open Discussions & Issues:**
   Engage, explore, and start contributing today!
 * **Community:**

@@ -1,6 +1,6 @@
-# Tinkerbell CLI (`tctl`)
+# Tiffany CLI (`tctl`)
 
-`tctl` is the official command-line interface (CLI) for interacting with a running Tinkerbell agent runtime inside a Firecracker or Apple container.
+`tctl` is the official command-line interface (CLI) for interacting with a running Tiffany agent runtime inside a Firecracker or Apple container.
 
 This tool enables developers and systems to submit tasks, monitor state, retrieve logs, inspect memory, and control agent lifecycle — all without needing direct access to the agent’s internals.
 
@@ -8,7 +8,7 @@ This tool enables developers and systems to submit tasks, monitor state, retriev
 
 ## 🎯 Primary Responsibilities
 
-- Communicate with the `tinkerbell` agent over **gRPC** or **Unix/vsock socket**
+- Communicate with the `tiffany` agent over **gRPC** or **Unix/vsock socket**
 - Submit task plans or commands to be scheduled
 - Query the canvas, task logs, and memory state
 - Send signals (pause, shutdown, snapshot) to the running agent
@@ -27,11 +27,11 @@ graph LR
     %% Padding between containers
     PAD_OUT[" "]:::pad
 
-    subgraph Tinkerbell Process
+    subgraph Tiffany Process
         %% Add invisible nodes for padding
         PAD1[" "]:::pad
         API[agent gRPC API]
-        Agent[tinkerbell -inside container]
+        Agent[tiffany -inside container]
         Scheduler
         ReasonAct
         PAD2[" "]:::pad

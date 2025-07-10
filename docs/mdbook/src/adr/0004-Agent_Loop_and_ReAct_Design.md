@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-Tinkerbell operates as an autonomous agent runtime that continuously interprets user intent, plans action sequences, invokes tools, edits code, and reflects on results. At the heart of this loop lies a **ReAct-style planning and execution model**, inspired by:
+Tiffany operates as an autonomous agent runtime that continuously interprets user intent, plans action sequences, invokes tools, edits code, and reflects on results. At the heart of this loop lies a **ReAct-style planning and execution model**, inspired by:
 
 - ReAct (Reasoning and Acting) patterns
 - Tree-of-Thought / scratchpad reasoning
@@ -75,7 +75,7 @@ sequenceDiagram
     Agent->>LLM: Generate plan
     LLM-->>Agent: Return structured plan (steps)
     Agent->>WAL: Log plan
-    Agent->>Git: Create feature branch (e.g. tinkerbell/feature/UUID)
+    Agent->>Git: Create feature branch (e.g. tiffany/feature/UUID)
 
     loop For each step in plan
         Agent->>User: Request confirmation (optional)
@@ -115,7 +115,7 @@ This alternating cycle is a natural match for coroutine-based agents.
 Each yield point corresponds to a WAL entry, and optionally, a virtual canvas diff. This provides traceability for every agent step — useful for debugging, replay, auditing, and agent explainability.
 
 ### 🔄 GitOps Commit Model
-- Each agent session operates on a dedicated `tinkerbell/feature/UUID` branch.
+- Each agent session operates on a dedicated `tiffany/feature/UUID` branch.
 - Every canvas action results in a `micro-commit` describing a semantic step.
 - Summary commits or merge commits allow audit, PRs, and history inspection.
 - Git patching and conflict handling is done via `git2-rs` and canvas logic.
@@ -133,7 +133,7 @@ Additional phases like:
 - All agent interactions must be decomposed into yieldable planning/action cycles
 - The LLM planning interface must support structured plan output (JSON schema, ReAct markdown, etc.)
 - WAL will record: instruction → plan → step start → step result → conclusion
-- Git branches must be managed for every task (`tinkerbell/feature/...`)
+- Git branches must be managed for every task (`tiffany/feature/...`)
 - Canvas operations must map cleanly to micro-commits
 - Recovered agents must resume at last successful step or Git commit
 - Tests must verify plan parsing, loop control, git patching, and WAL consistency
@@ -151,7 +151,7 @@ Additional phases like:
 
 ## Related Documents
 - [ADR-0003: Task Scheduler Model](adr_0003_task_scheduler.md)
-- [Tinkerbell System Architecture](../whitepapers/Tinkerbell%20System%20Architecture%20and%20Design%20Overview.md)
+- [Tiffany System Architecture](../whitepapers/Tiffany%20System%20Architecture%20and%20Design%20Overview.md)
 - [Gemini CLI Agent Analysis](../whitepapers/Gemini%20CLI%20Agent%20Architecture%20and%20Reimplementation%20Plan.md)
 
 ---

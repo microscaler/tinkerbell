@@ -16,7 +16,7 @@ pub struct Cli {
     #[arg(long, global = true)]
     pub plain: bool,
     /// Endpoint of the daemon
-    #[arg(long, default_value = "unix:/tmp/tinkerbell.sock", global = true)]
+    #[arg(long, default_value = "unix:/tmp/tiffany.sock", global = true)]
     pub endpoint: String,
     #[command(subcommand)]
     pub command: Commands,
