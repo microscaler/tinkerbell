@@ -1,3 +1,3 @@
 #!/bin/bash
-echo "Starting tinkerbell daemon..."
+echo "Starting tiffany daemon..."
 cargo run -p daemon

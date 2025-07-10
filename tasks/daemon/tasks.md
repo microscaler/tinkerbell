@@ -1,14 +1,14 @@
-# Tinkerbell Daemon Crate Tasks
+# Tiffany Daemon Crate Tasks
 
 ## Goal
-Build the binary entrypoint for the `tinkerbell` agent, responsible for:
+Build the binary entrypoint for the `tiffany` agent, responsible for:
 - Config file loading
 - Signal handling
 - Starting the scheduler runtime loop
 
 ## Tasks
 
-- [ ] Create `bin/tinkerbell.rs` to:
+- [ ] Create `bin/tiffany.rs` to:
     - Load config
     - Initialize logging and metrics
     - Call `daemon::run()`

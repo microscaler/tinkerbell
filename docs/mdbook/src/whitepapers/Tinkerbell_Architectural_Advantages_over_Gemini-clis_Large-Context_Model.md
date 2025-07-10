@@ -1,4 +1,4 @@
-# 🔮 Tinkerbell: Architectural Advantages over Gemini-cli's Large-Context Model
+# 🔮 Tiffany: Architectural Advantages over Gemini-cli's Large-Context Model
 
 ## ⚖️ Context and Challenges of Current Systems (e.g., Gemini-cli)
 
@@ -18,14 +18,14 @@ Current large-context LLM agents (e.g., Gemini-cli with \~1 million tokens conte
 
 ---
 
-## 🚀 How Tinkerbell’s Architecture Overcomes These Limitations
+## 🚀 How Tiffany’s Architecture Overcomes These Limitations
 
-Tinkerbell addresses these challenges through a **careful combination of specialized architectural patterns** rather than relying solely on brute-force large context windows. Your comprehensive ADR set outlines the following strategic pillars:
+Tiffany addresses these challenges through a **careful combination of specialized architectural patterns** rather than relying solely on brute-force large context windows. Your comprehensive ADR set outlines the following strategic pillars:
 
 ### 1️⃣ **Sophisticated Persistent Memory (ADR-0008)**
 
 * **Neo4j Semantic Graph + VectorDB Embeddings:**
-  Instead of a massive, flat token context, Tinkerbell stores semantic relationships explicitly, allowing dynamic and targeted retrieval of relevant context at execution time.
+  Instead of a massive, flat token context, Tiffany stores semantic relationships explicitly, allowing dynamic and targeted retrieval of relevant context at execution time.
 * **Temporal Drift Management:**
   Explicit versioning and time-aware semantic management ensure context is always current, reducing repetitive mistakes or outdated reasoning.
 
@@ -39,7 +39,7 @@ Tinkerbell addresses these challenges through a **careful combination of special
 ### 3️⃣ **Hexagonal Skilled Clusters (ADR-0012)**
 
 * **Clustered Specialization:**
-  Tinkerbell employs coordinated clusters of specialized FAR agents, each maintaining smaller, highly specialized contexts relevant to their roles (Story Planning, QA, Security, etc.).
+  Tiffany employs coordinated clusters of specialized FAR agents, each maintaining smaller, highly specialized contexts relevant to their roles (Story Planning, QA, Security, etc.).
 * **Explicit Personas:**
   These specialized clusters represent explicit personas, enhancing clarity, reasoning depth, and enabling precise, context-driven collaboration.
 
@@ -60,7 +60,7 @@ Tinkerbell addresses these challenges through a **careful combination of special
 ### 6️⃣ **Flexible Multi-LLM Routing (ADR-0013)**
 
 * **GenAI Router:**
-  Instead of relying on a single LLM and a massive context window, Tinkerbell intelligently routes tasks to the most suitable LLM (local inference, cloud provider, optimized specialized LLMs) based on performance, cost, and capability.
+  Instead of relying on a single LLM and a massive context window, Tiffany intelligently routes tasks to the most suitable LLM (local inference, cloud provider, optimized specialized LLMs) based on performance, cost, and capability.
 
 ### 7️⃣ **Advanced Observability (ADR-0018 & ADR-0019)**
 
@@ -71,7 +71,7 @@ Tinkerbell addresses these challenges through a **careful combination of special
 
 ## 📈 Comparison of Approaches
 
-| Feature / Capability            | Gemini-cli (1M token)       | Tinkerbell (Semantic+Clustered+Distributed) |
+| Feature / Capability            | Gemini-cli (1M token)       | Tiffany (Semantic+Clustered+Distributed) |
 | ------------------------------- | --------------------------- | ------------------------------------------- |
 | **Context Management**          | 🔸 Large flat token context | ✅ Semantic graph & structured contexts      |
 | **Temporal Drift Handling**     | ❌ Limited or none           | ✅ Explicit temporal versioning              |
@@ -86,7 +86,7 @@ Tinkerbell addresses these challenges through a **careful combination of special
 ## 🌟 How These Advantages Translate Practically:
 
 * **Reduced Cost & Resource Needs:**
-  By intelligently maintaining minimal contexts and caching relevant data, Tinkerbell dramatically reduces compute costs compared to monolithic large-context LLM systems.
+  By intelligently maintaining minimal contexts and caching relevant data, Tiffany dramatically reduces compute costs compared to monolithic large-context LLM systems.
 
 * **Higher Accuracy and Relevance:**
   Semantic graph-based reasoning, precise versioned memory states, and clustered specialization significantly reduce repetitive errors and improve output accuracy.
@@ -95,16 +95,16 @@ Tinkerbell addresses these challenges through a **careful combination of special
   Explicit micro-commit management and structured tracing/logging provide unmatched auditability and traceability.
 
 * **Future-Proof Flexibility:**
-  Multi-LLM routing ensures that Tinkerbell seamlessly integrates with emerging specialized LLMs and inference optimizations.
+  Multi-LLM routing ensures that Tiffany seamlessly integrates with emerging specialized LLMs and inference optimizations.
 
 * **Scalable Community and Open-Source Collaboration:**
   Clearly structured ADR governance and explicit cluster specialization encourage community contribution and extensibility.
 
 ---
 
-## 🏅 Conclusion: Tinkerbell’s Strategic Edge
+## 🏅 Conclusion: Tiffany’s Strategic Edge
 
-Tinkerbell’s unique combination of sophisticated architectural strategies—semantic memory management, structured micro-commits, specialized skill clusters, robust orchestration, distributed lifecycle control, multi-LLM flexibility, and detailed observability—elevates it substantially beyond the brute-force large-context model used by Gemini-cli.
+Tiffany’s unique combination of sophisticated architectural strategies—semantic memory management, structured micro-commits, specialized skill clusters, robust orchestration, distributed lifecycle control, multi-LLM flexibility, and detailed observability—elevates it substantially beyond the brute-force large-context model used by Gemini-cli.
 
-Rather than merely storing more tokens, Tinkerbell fundamentally reshapes how context is managed, ensuring more precise, efficient, scalable, and reliable autonomous agentic development.
+Rather than merely storing more tokens, Tiffany fundamentally reshapes how context is managed, ensuring more precise, efficient, scalable, and reliable autonomous agentic development.
 

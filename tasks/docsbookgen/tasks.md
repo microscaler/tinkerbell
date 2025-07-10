@@ -1,12 +1,12 @@
-# Tinkerbell Docsbookgen Crate Tasks
+# Tiffany Docsbookgen Crate Tasks
 
 ## Goal
-Build the docsbook for the `tinkerbell` project, responsible for:
+Build the docsbook for the `tiffany` project, responsible for:
 - rust code docs
 
 ## Tasks
 
-- [ ] Update `docsbookgen` to generate docs from the `tinkerbell` codebase:
+- [ ] Update `docsbookgen` to generate docs from the `tiffany` codebase:
   - [ ] Ensure it includes all public APIs
   - [ ] Generate markdown files for each module
   - [ ] Integrate with existing `mdbook` structure

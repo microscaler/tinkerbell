@@ -4,12 +4,12 @@
 Accepted
 
 ## Context
-Tinkerbell agents execute reasoning and action loops that produce edits to codebases and configuration files. These changes must be:
+Tiffany agents execute reasoning and action loops that produce edits to codebases and configuration files. These changes must be:
 - Previewed and isolated in-memory before committing
 - Committed to a Git-compatible format for auditing
 - Logged as durable steps in the WAL
 
-To achieve this, Tinkerbell introduces a **Virtual Canvas** that acts as a mutable, ephemeral buffer for applying LLM-generated or tool-generated edits prior to Git integration.
+To achieve this, Tiffany introduces a **Virtual Canvas** that acts as a mutable, ephemeral buffer for applying LLM-generated or tool-generated edits prior to Git integration.
 
 This ADR defines the structure of the virtual canvas, our Git branching strategy, the use of micro-commits, and how patches flow from the canvas into Git and ultimately `main`.
 
@@ -21,7 +21,7 @@ We will implement a layered model for code manipulation:
 
 1. **Virtual Canvas**: An in-memory, coroutine-driven buffer representing the current working state of one or more files.
 2. **Micro-Commits**: Every semantic patch results in a discrete Git commit on a feature branch.
-3. **Feature Branching**: Each agent task operates in its own `tinkerbell/feature/<UUID>` branch.
+3. **Feature Branching**: Each agent task operates in its own `tiffany/feature/<UUID>` branch.
 4. **Merge Strategy**: Upon successful completion, the feature branch is squash-merged or PR’d into `main`.
 5. **Git Library**: All Git interaction is performed using `git2-rs` for deterministic, auditable patching.
 
@@ -46,7 +46,7 @@ We will implement a layered model for code manipulation:
 
 ```text
 main
- └── tinkerbell/feature/<UUID>
+ └── tiffany/feature/<UUID>
       ├── commit: plan step 1
       ├── commit: plan step 2
       └── commit: plan step N
@@ -77,7 +77,7 @@ sequenceDiagram
 
     User->>Agent: Submit instruction ("Add validation to model.rs")
     Agent->>WAL: Log instruction start
-    Agent->>Git: Create feature branch (tinkerbell/feature/UUID)
+    Agent->>Git: Create feature branch (tiffany/feature/UUID)
     Agent->>LLM: Generate plan
     LLM-->>Agent: Plan: step-by-step edits
     Agent->>WAL: Log received plan
@@ -145,7 +145,7 @@ sequenceDiagram
 
 ## Related Documents
 - [ADR-0004: Agent Loop and ReAct Design](adr_0004_agent_loop_react.md)
-- [Tinkerbell System Architecture](../whitepapers/Tinkerbell%20System%20Architecture%20and%20Design%20Overview.md)
+- [Tiffany System Architecture](../whitepapers/Tiffany%20System%20Architecture%20and%20Design%20Overview.md)
 
 ---
 

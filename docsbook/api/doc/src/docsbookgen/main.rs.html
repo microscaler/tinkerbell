@@ -66,11 +66,11 @@
 <a href=#66 id=66 data-nosnippet>66</a>    }
 <a href=#67 id=67 data-nosnippet>67</a>
 <a href=#68 id=68 data-nosnippet>68</a>    <span class="comment">// Step 5: Copy the custom CSS used by the index page
-<a href=#69 id=69 data-nosnippet>69</a>    </span><span class="kw">let </span>style_src = Path::new(<span class="string">"docsbook/style/tinkerbell.css"</span>);
+<a href=#69 id=69 data-nosnippet>69</a>    </span><span class="kw">let </span>style_src = Path::new(<span class="string">"docsbook/style/tiffany.css"</span>);
 <a href=#70 id=70 data-nosnippet>70</a>    <span class="kw">let </span>style_dest = docbook_out.join(<span class="string">"style"</span>);
 <a href=#71 id=71 data-nosnippet>71</a>    <span class="kw">if </span>style_src.exists() {
 <a href=#72 id=72 data-nosnippet>72</a>        fs::create_dir_all(<span class="kw-2">&amp;</span>style_dest).expect(<span class="string">"Failed to create docsbook/style dir"</span>);
-<a href=#73 id=73 data-nosnippet>73</a>        fs::copy(<span class="kw-2">&amp;</span>style_src, style_dest.join(<span class="string">"tinkerbell.css"</span>)).expect(<span class="string">"Failed to copy CSS"</span>);
+<a href=#73 id=73 data-nosnippet>73</a>        fs::copy(<span class="kw-2">&amp;</span>style_src, style_dest.join(<span class="string">"tiffany.css"</span>)).expect(<span class="string">"Failed to copy CSS"</span>);
 <a href=#74 id=74 data-nosnippet>74</a>    }
 <a href=#75 id=75 data-nosnippet>75</a>
 <a href=#76 id=76 data-nosnippet>76</a>    <span class="comment">// Step 6: Generate a simple index.html linking to API and mdBook docs
@@ -78,11 +78,11 @@
 <a href=#78 id=78 data-nosnippet>78</a>&lt;html lang=\"en\"&gt;
 <a href=#79 id=79 data-nosnippet>79</a>  &lt;head&gt;
 <a href=#80 id=80 data-nosnippet>80</a>    &lt;meta charset=\"utf-8\"&gt;
-<a href=#81 id=81 data-nosnippet>81</a>    &lt;title&gt;Tinkerbell Documentation&lt;/title&gt;
-<a href=#82 id=82 data-nosnippet>82</a>    &lt;link rel=\"stylesheet\" href=\"style/tinkerbell.css\"&gt;
+<a href=#81 id=81 data-nosnippet>81</a>    &lt;title&gt;Tiffany Documentation&lt;/title&gt;
+<a href=#82 id=82 data-nosnippet>82</a>    &lt;link rel=\"stylesheet\" href=\"style/tiffany.css\"&gt;
 <a href=#83 id=83 data-nosnippet>83</a>  &lt;/head&gt;
 <a href=#84 id=84 data-nosnippet>84</a>  &lt;body&gt;
-<a href=#85 id=85 data-nosnippet>85</a>    &lt;h1&gt;Tinkerbell Documentation&lt;/h1&gt;
+<a href=#85 id=85 data-nosnippet>85</a>    &lt;h1&gt;Tiffany Documentation&lt;/h1&gt;
 <a href=#86 id=86 data-nosnippet>86</a>    &lt;ul&gt;
 <a href=#87 id=87 data-nosnippet>87</a>      &lt;li&gt;&lt;a href=\"api/index.html\"&gt;Rust API Docs&lt;/a&gt;&lt;/li&gt;
 <a href=#88 id=88 data-nosnippet>88</a>      &lt;li&gt;&lt;a href=\"md/book/index.html\"&gt;mdBook Docs&lt;/a&gt;&lt;/li&gt;

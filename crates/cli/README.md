@@ -1,6 +1,6 @@
-# Tinkerbell CLI (`tctl`)
+# Tiffany CLI (`ttnyctl`)
 
-`tctl` is the official command-line interface (CLI) for interacting with a running Tinkerbell agent runtime inside a Firecracker or Apple container.
+`ttnyctl` is the official command-line interface (CLI) for interacting with a running Tiffany agent runtime inside a Firecracker or Apple container.
 
 This tool enables developers and systems to submit tasks, monitor state, retrieve logs, inspect memory, and control agent lifecycle — all without needing direct access to the agent’s internals.
 
@@ -8,7 +8,7 @@ This tool enables developers and systems to submit tasks, monitor state, retriev
 
 ## 🎯 Primary Responsibilities
 
-- Communicate with the `tinkerbell` agent over **gRPC** or **Unix/vsock socket**
+- Communicate with the `tiffany` agent over **gRPC** or **Unix/vsock socket**
 - Submit task plans or commands to be scheduled
 - Query the canvas, task logs, and memory state
 - Send signals (pause, shutdown, snapshot) to the running agent
@@ -21,17 +21,17 @@ This tool enables developers and systems to submit tasks, monitor state, retriev
 ```mermaid
 graph LR
   subgraph Outside Container
-    CLI[tctl -outside container]
+    CLI[ttnyctl -outside container]
   end
   subgraph Inside Container
     %% Padding between containers
     PAD_OUT[" "]:::pad
 
-    subgraph Tinkerbell Process
+    subgraph Tiffany Process
         %% Add invisible nodes for padding
         PAD1[" "]:::pad
         API[agent gRPC API]
-        Agent[tinkerbell -inside container]
+        Agent[tiffany -inside container]
         Scheduler
         ReasonAct
         PAD2[" "]:::pad
@@ -50,16 +50,16 @@ graph LR
 
 | Category      | Commands                                 | Status   |
 | ------------- |------------------------------------------|----------|
-| Task Control  | `tctl task submit`, `task list`          | ⏳        |
-| Canvas Access | `tctl canvas show`, `canvas diff`        | ⏳        |
-| Agent Status  | `tctl status`, `tctl agents`             | ✅        |
-| Logging       | `tctl logs tail`, `logs grep`            | ⏳        |
-| Secrets Mgmt  | `tctl secret add`, `secret list`         | ⏳        |
-| Help/Docs     | `tctl --help`, `--json`, `--plain`       | ✅        |
-| Lifecycle     | `tctl pause`, `tctl shutdown or restart` | ✅      |
-| Memory Access | `tctl memory show`, `memory edit`        | ⏳        |
-| Debugging     | `tctl debug`, `debug trace`              | ⏳        |
-| Misc          | `tctl config`, `tctl version`            | ⏳        |
+| Task Control  | `ttnyctl task submit`, `task list`          | ⏳        |
+| Canvas Access | `ttnyctl canvas show`, `canvas diff`        | ⏳        |
+| Agent Status  | `ttnyctl status`, `ttnyctl agents`             | ✅        |
+| Logging       | `ttnyctl logs tail`, `logs grep`            | ⏳        |
+| Secrets Mgmt  | `ttnyctl secret add`, `secret list`         | ⏳        |
+| Help/Docs     | `ttnyctl --help`, `--json`, `--plain`       | ✅        |
+| Lifecycle     | `ttnyctl pause`, `ttnyctl shutdown or restart` | ✅      |
+| Memory Access | `ttnyctl memory show`, `memory edit`        | ⏳        |
+| Debugging     | `ttnyctl debug`, `debug trace`              | ⏳        |
+| Misc          | `ttnyctl config`, `ttnyctl version`            | ⏳        |
 
 
 > ✅ CLI is fully `clap`-based and designed to support both human-readable and scriptable JSON output.
@@ -68,7 +68,7 @@ graph LR
 
 ## 🔐 Transport Configuration
 
-`tctl` connects to a running agent using:
+`ttnyctl` connects to a running agent using:
 
 * **Default (dev):** Unix domain socket (UDS)
 * **Firecracker (prod):** vsock address (CID + port)
@@ -86,17 +86,17 @@ export TCTL_ADDR=vsock://3:5000
 
 ```bash
 # Show agent status
-tctl status
+ttnyctl status
 # JSON formatted
-tctl status --json
+ttnyctl status --json
 # Plain text
-tctl status --plain
+ttnyctl status --plain
 
 # Submit a plan
-tctl task submit --file plan.json
+ttnyctl task submit --file plan.json
 
 # Show logs for a canvas task
-tctl logs tail --task-id task_187
+ttnyctl logs tail --task-id task_187
 ```
 
 ---
@@ -106,7 +106,7 @@ tctl logs tail --task-id task_187
 ```txt
 crates/cli/
 ├── bin/
-│   └── tctl.rs         # CLI entrypoint
+│   └── ttnyctl.rs         # CLI entrypoint
 ├── src/
 │   ├── lib.rs          # CLI structure + execution
 │   ├── commands/       # Subcommand modules
@@ -139,4 +139,4 @@ cargo build -p cli --release
 
 ## 🚀 Goals
 
-`tctl` is designed to be ergonomic, scriptable, and safe-by-default — providing full visibility and control over autonomous agent operation without requiring privileged access to the agent internals.
+`ttnyctl` is designed to be ergonomic, scriptable, and safe-by-default — providing full visibility and control over autonomous agent operation without requiring privileged access to the agent internals.

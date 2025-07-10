@@ -4,7 +4,7 @@
 
 ## ❓ Why Now?
 
-Autonomous agents like Tinkerbell require isolated, reproducible, and resource-constrained execution environments — much like microVMs.
+Autonomous agents like Tiffany require isolated, reproducible, and resource-constrained execution environments — much like microVMs.
 
 Google’s Gemini CLI and other systems assume developer desktops or ephemeral cloud sandboxes. But these models break down when:
 
@@ -44,7 +44,7 @@ But that’s exactly where it becomes unsuitable for our needs.
 | Assumes each VM is a K8s node | ✅ Yes                          | ❌ No — VMs run agents, not Kubelets    |
 | Creates worker node infra     | ✅ Cloud-init, bootstrapping    | ❌ We want agent workloads, not nodes   |
 | Built for CAPI                | ✅ Cluster API standard         | ❌ We want independent micro agent pods |
-| Requires Kubernetes bootstrap | ✅ kubeadm/cloud-init flows     | ❌ We boot directly to Tinkerbell agent |
+| Requires Kubernetes bootstrap | ✅ kubeadm/cloud-init flows     | ❌ We boot directly to Tiffany agent |
 
 Thus, while Flintlock is ideal as a backend runtime, `cluster-api-provider-microvm` introduces an entire stack of node-management logic we do not want — and cannot reuse.
 
@@ -52,13 +52,13 @@ Thus, while Flintlock is ideal as a backend runtime, `cluster-api-provider-micro
 
 ## ✅ What We Will Build
 
-### 🧠 The `far-agent-controller` (Tinkerbell Native)
+### 🧠 The `far-agent-controller` (Tiffany Native)
 
 A Kubernetes controller that:
 
 * Watches for custom `FarAgent` CRDs
 * Calls Flintlock’s gRPC API directly
-* Boots minimal rootfs images that run the `tinkerbell` binary
+* Boots minimal rootfs images that run the `tiffany` binary
 * Tracks state via K8s `status` and `conditions`
 * Publishes agent stdout/stderr, metrics, and lifecycle logs
 
@@ -69,15 +69,15 @@ A Kubernetes controller that:
 Example:
 
 ```yaml
-apiVersion: tinkerbell.dev/v1
+apiVersion: tiffany.dev/v1
 kind: FarAgent
 metadata:
   name: embedder-worker-01
 spec:
-  image: ghcr.io/microscaler/tinkerbell-vm:v0.3.1
+  image: ghcr.io/microscaler/tiffany-vm:v0.3.1
   memory: 512Mi
   cpu: 1
-  entrypoint: /usr/local/bin/tinkerbell
+  entrypoint: /usr/local/bin/tiffany
   args: ["--task", "embedder"]
 ```
 
@@ -97,7 +97,7 @@ Controller responsibilities:
 | Firecracker API surface       | ✅ Flintlock abstracts Firecracker   | ✅ Uses Flintlock gRPC for lifecycle ops  |
 | VM creation                   | ✅ Flintlock handles it              | ✅ Controller calls it via gRPC           |
 | Orchestration & task logic    | ❌ Not supported                     | ✅ Custom controller logic per `FarAgent` |
-| Image injection & boot config | ✅ Flintlock supports container boot | ✅ We use it to run `tinkerbell` runtime  |
+| Image injection & boot config | ✅ Flintlock supports container boot | ✅ We use it to run `tiffany` runtime  |
 | Secrets & network             | ❌ Out of scope                      | ✅ Controller injects token/env/volumes   |
 
 We **will contribute patches** to Flintlock as needed, especially around:
